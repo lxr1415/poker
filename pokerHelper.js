@@ -283,92 +283,30 @@ window.pokerHelper = {};
             return false 
         }
 
+
+
         //跟出
 
         if(currentState.cardType === 0) {
 
-            var randomCardIndex = this.groupedCards[currentState.group][Math.floor(Math.random() * len)]
-            this.selectCards.push(randomCardIndex)
+            
         } else if(currentState.cardType === 1)  {
 
             if(len > 1) {
 
-                var randomCardIndex = this.groupedCards[currentState.group].findIndex((_, i) =>{
-
-                    return i < len - 1 && pokers[i].value === pokers[i + 1].value
-                })
-
-                if(randomCardIndex >= 0) {
-
-                    this.selectCards.push(
-                        this.groupedCards[currentState.group][randomCardIndex], 
-                        this.groupedCards[currentState.group][randomCardIndex + 1]
-                    )
-                } else {
-
-                    this.selectCards.push(
-                        this.groupedCards[currentState.group][0], 
-                        this.groupedCards[currentState.group][1]
-                    )
-                }
+               
             } else {
 
-                this.selectCards.push(this.groupedCards[currentState.group][0])
-
-                var index = this.cards.findIndex((cardIndex) => 
-                    this.groupedCards[currentState.group][0] === cardIndex
-                ) 
-
-                if(index > 0) {
-                    this.selectCards.push(this.cards[index - 1])
-                } else {
-                    this.selectCards.push(this.cards[index + 1])
-                }
+              
             }
 
         } else if(currentState.cardType === 2)  {
 
             if(len >= currentState.cards[0].length) {
 
-                var randomCardIndex = this.groupedCards[currentState.group].findIndex((_, i) =>{
-
-                    return i < len - currentState.cards[0].length 
-                            && pokerHelper.getCardType(this.groupedCards[currentState.group].slice(i, i + currentState.cards[0].length - 1)) === 2
-                })
-
-                if(randomCardIndex >= 0) {
-
-                    currentState.cards[0].length.forEach((_, i) => {
-
-                        this.selectCards.push(this.groupedCards[currentState.group][randomIndex + i])
-                    })
-                } else {
-                    currentState.cards[0].forEach((_, i) => {
-
-                        this.selectCards.push(this.groupedCards[currentState.group][i])
-                    })
-                }
+               
             } else {
 
-                this.groupedCards[currentState.group].forEach((_, i) => {
-
-                    this.selectCards.push(this.groupedCards[currentState.group][i])
-                })
-
-                var copyCards = JSON.parse(JSON.stringify(this.cards));
-
-                this.selectCards.forEach(cardIndex => {
-
-                    copyCards.splice(copyCards.indexOf(cardIndex), 1)
-                })
-
-                var leastNum = currentState.cards[0].length - this.selectCards.length;
-
-                var randomIndex = Math.floor(Math.random() * (copyCards.length - leastNum + 1 ));
-
-                for (var i = 0; i < leastNum; i++) {
-                    this.selectCards.push(this.cards[randomIndex + i])
-                }
 
             }
         }
