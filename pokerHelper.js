@@ -4,8 +4,8 @@
 // poker {
 //     suit // 花色
 //     point // 牌点
-//     defaultValue //牌默认权值, '3' - 'a' => 3 - 14; '2' => 15, 16; 小王 => 19 大王 => 20
-//     value // 牌权值, 修改级牌权值 '3' - 'a' => 3 - 14; '2' => 15, 16; 级牌 => 17, 18; 小王 => 19 大王 => 20
+//     defaultValue //牌默认权值, '3' - 'a' => 3 - 14; '2' => 27; 小王 => 31 大王 => 32
+//     value // 牌权值, 修改级牌权值 '3' - 'a' => 15 - 26; '2' => 27, 28; 级牌 => 29, 30;
 //     image // 牌的图片
 //     isMater // 是否是主牌
 // }
@@ -122,15 +122,28 @@ window.pokerHelper = {};
     
         pokers.forEach((poker,i) => {
     
+            // 主2
             if(poker.point === '2' && poker.suit === master) {
     
-                pokers[i].value = 16
-            } else if(poker.defaultValue === levelPoint) {
+                pokers[i].value = 28
+            } 
+            // 级牌
+            else if(poker.defaultValue === levelPoint) {
     
-                pokers[i].value = poker.suit === master ? 18 : 17
-            } else {
-    
-                pokers[i].value = poker.defaultValue;
+                pokers[i].value = poker.suit === master ? 30 : 29
+            }
+            // 其他牌 
+            else {
+                // 普通主牌
+                if(poker.suit === master) {
+                    
+                    pokers[i].value = poker.defaultValue + 12;
+                }
+                // 副牌 
+                else {
+                    
+                    pokers[i].value = poker.defaultValue;
+                }
             }
 
             pokers[i].isMaster = false;
@@ -200,6 +213,20 @@ window.pokerHelper = {};
     function getCardType(cardIndexs, levelPoint) {
     
         sortCards(cardIndexs);
+
+        // 主牌副牌混合
+        if( cardIndexs.find( cardIndex => pokers[cardIndex].isMaster !== pokers[cardIndexs[0]].isMaster ) ) {
+            return -1
+        }
+
+        // 副牌中不同花色混合
+        if(!pokers[cardIndexs[0]].isMaster && cardIndexs.find( cardIndex =>  pokers[cardIndex].suit !== pokers[cardIndexs[0]].suit ) ) {
+            return -1
+        }
+
+
+
+        // 同为主/副牌, 为副牌时,同花色
     
         if (cardIndexs.length === 1) {
     
@@ -248,14 +275,103 @@ window.pokerHelper = {};
      * @param {number} master 主牌类型
      * @param {number} level 级牌
      */
-    function isValidCard({ cardIndexs, isStartPlayer, master, isMaster, startCards, level }) {
+    function isValidCard( selectCards, currentState ) {
     
-        var cardType = getCardType(cardIndexs, level, master);
-        if (isStartPlayer && cardType >= 0) {
-            return false
+        //首出
+        //不符合牌型
+        if(currentState.startPlayer === currentState.player && getCardType(selectCards) < 0) {
+            return false 
         }
-    
-        return true
+
+        //跟出
+
+        if(currentState.cardType === 0) {
+
+            var randomCardIndex = this.groupedCards[currentState.group][Math.floor(Math.random() * len)]
+            this.selectCards.push(randomCardIndex)
+        } else if(currentState.cardType === 1)  {
+
+            if(len > 1) {
+
+                var randomCardIndex = this.groupedCards[currentState.group].findIndex((_, i) =>{
+
+                    return i < len - 1 && pokers[i].value === pokers[i + 1].value
+                })
+
+                if(randomCardIndex >= 0) {
+
+                    this.selectCards.push(
+                        this.groupedCards[currentState.group][randomCardIndex], 
+                        this.groupedCards[currentState.group][randomCardIndex + 1]
+                    )
+                } else {
+
+                    this.selectCards.push(
+                        this.groupedCards[currentState.group][0], 
+                        this.groupedCards[currentState.group][1]
+                    )
+                }
+            } else {
+
+                this.selectCards.push(this.groupedCards[currentState.group][0])
+
+                var index = this.cards.findIndex((cardIndex) => 
+                    this.groupedCards[currentState.group][0] === cardIndex
+                ) 
+
+                if(index > 0) {
+                    this.selectCards.push(this.cards[index - 1])
+                } else {
+                    this.selectCards.push(this.cards[index + 1])
+                }
+            }
+
+        } else if(currentState.cardType === 2)  {
+
+            if(len >= currentState.cards[0].length) {
+
+                var randomCardIndex = this.groupedCards[currentState.group].findIndex((_, i) =>{
+
+                    return i < len - currentState.cards[0].length 
+                            && pokerHelper.getCardType(this.groupedCards[currentState.group].slice(i, i + currentState.cards[0].length - 1)) === 2
+                })
+
+                if(randomCardIndex >= 0) {
+
+                    currentState.cards[0].length.forEach((_, i) => {
+
+                        this.selectCards.push(this.groupedCards[currentState.group][randomIndex + i])
+                    })
+                } else {
+                    currentState.cards[0].forEach((_, i) => {
+
+                        this.selectCards.push(this.groupedCards[currentState.group][i])
+                    })
+                }
+            } else {
+
+                this.groupedCards[currentState.group].forEach((_, i) => {
+
+                    this.selectCards.push(this.groupedCards[currentState.group][i])
+                })
+
+                var copyCards = JSON.parse(JSON.stringify(this.cards));
+
+                this.selectCards.forEach(cardIndex => {
+
+                    copyCards.splice(copyCards.indexOf(cardIndex), 1)
+                })
+
+                var leastNum = currentState.cards[0].length - this.selectCards.length;
+
+                var randomIndex = Math.floor(Math.random() * (copyCards.length - leastNum + 1 ));
+
+                for (var i = 0; i < leastNum; i++) {
+                    this.selectCards.push(this.cards[randomIndex + i])
+                }
+
+            }
+        }
     }
     
     /**
@@ -265,11 +381,9 @@ window.pokerHelper = {};
      * @param {*} level 
      * @param {*} master 
      */
-    function isMaster(cardIndexs, levelPoint, master) {
+    function isMaster(cardIndexs) {
     
-        var cardType = getCardType(cardIndexs, levelPoint, master);
-    
-        return cardType >= 0 && pokers[cardIndexs[0]].value >= 15
+        return !cardIndexs.find( cardIndex => !pokers[cardIndex].isMaster)
     }
     
     /**

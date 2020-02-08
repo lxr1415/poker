@@ -36,7 +36,7 @@ function Game(players, options) {
         startPlayer: -1, //第一个出牌人
         cards: [], //已出牌
         group: "", //首出牌种类
-        type: -1, // 首出牌牌型
+        cardType: -1, // 首出牌牌型
         player: -1, //出牌人
         scroe: 0, // 本轮中的分数
         bigCardPlayer: -1, //出牌中最大者
@@ -111,11 +111,11 @@ Game.prototype.dealOneCard = function (i) {
 
         console.log('players', this.players);
 
-        setPokersValue(this.currentInfo.level, this.currentInfo.master)
+        pokerHelper.setPokersValue(this.currentInfo.level, this.currentInfo.master)
 
-        this.players.forEach(function(player) {
+        this.players.forEach(player => {
 
-            player.divideCard(this.currentInfo.master)
+            player.divideCards(this.currentInfo.master)
         })
 
         this.setStage(STAGE.setHole);
@@ -178,26 +178,42 @@ Game.prototype.play = function (cards) {
             this.setStage(STAGE.end);
             return;
         }
+
+        return; // 测试只打一轮
     }
 
     if(this.currentState.player === 0) {
 
-        this.showPlayPanel(() => {
+        this.showPlayPanel((selectCards) => {
+            this.players[0].playCard(selectCards);
+            this.currentState.cards.push(selectCards);
+
+            if(this.currentState.player === this.currentState.startPlayer){
+
+                this.currentState.group = pokers[selectCards[0]].isMaster ? "master" : pokers[selectCards[0]].suit;
+                this.currentState.cardType = pokerHelper.getCardType(selectCards);
+            }
+
+            console.log(this.currentState.player, "出牌: ", console.log(selectCards.map(cardIndex => pokers[cardIndex])))
+
+            this.currentState.player = (this.currentState.player + 1) % 4;
+
             this.play();
         });
     } else {
         var selectCards = this.players[this.currentState.player].selectRandomCards(this.currentState);
         this.players[this.currentState.player].playCard(selectCards);
         this.currentState.cards.push(selectCards);
-        this.currentState.player = (this.currentState.player + 1) % 4;
 
         if(this.currentState.player === this.currentState.startPlayer){
 
             this.currentState.group = pokers[selectCards[0]].isMaster ? "master" : pokers[selectCards[0]].suit;
-            this.currentState.type = pokerHelper.getCardType(selectCards);
+            this.currentState.cardType = pokerHelper.getCardType(selectCards);
         }
-
+ 
         console.log(this.currentState.player, "出牌: ", console.log(selectCards.map(cardIndex => pokers[cardIndex])))
+
+        this.currentState.player = (this.currentState.player + 1) % 4;
 
         this.play();
     }
@@ -214,8 +230,30 @@ Game.prototype.end = function (cards) {
 
 Game.prototype.showPlayPanel = function (callback) {
 
-    console.log('showPlayPanel');
+    console.log('showPlayPanel', '你出牌: ');
 
+    var playCardButton = document.getElementById("playCard");
+    playCardButton.style.display = "inline-block";
 
+    playCardButton.onclick = () => {
+
+        var selectCards = document.getElementById("selectCardIndex").value;
     
+        selectCards = selectCards.split(",")
+        selectCards.forEach((cardIndex, i) => {
+            selectCards[i] = Number(cardIndex)
+        });
+
+
+        //判断出牌是否符合规则
+        if(pokerHelper.isValidCard(selectCards, this.currentState)){
+
+            callback.call(null, selectCards)
+    
+            playCardButton.style.display = "none";
+        } else {
+            console.log("出牌不符合规则")
+        }
+    }
+
 }

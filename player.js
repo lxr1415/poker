@@ -71,11 +71,11 @@ Player.prototype.selectRandomCards = function(currentState) {
         var len = this.groupedCards[currentState.group].length;
         if(len > 0) {
 
-            if(currentState.type === 0) {
+            if(currentState.cardType === 0) {
 
                 var randomCardIndex = this.groupedCards[currentState.group][Math.floor(Math.random() * len)]
                 this.selectCards.push(randomCardIndex)
-            } else if(currentState.type === 1)  {
+            } else if(currentState.cardType === 1)  {
 
                 if(len > 1) {
 
@@ -112,7 +112,7 @@ Player.prototype.selectRandomCards = function(currentState) {
                     }
                 }
 
-            } else if(currentState.type === 2)  {
+            } else if(currentState.cardType === 2)  {
 
                 if(len >= currentState.cards[0].length) {
 
