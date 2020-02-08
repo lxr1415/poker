@@ -32,9 +32,11 @@ function Game(players, options) {
     }
 
     //本轮出牌信息
-    this.current = {
+    this.currentState = {
         startPlayer: -1, //第一个出牌人
         cards: [], //已出牌
+        group: "", //首出牌种类
+        type: -1, // 首出牌牌型
         player: -1, //出牌人
         scroe: 0, // 本轮中的分数
         bigCardPlayer: -1, //出牌中最大者
@@ -45,6 +47,15 @@ function Game(players, options) {
 Game.prototype.setStage = function (stage) {
     this.stage = stage;
     this[this.stageHandle[stage]]();
+}
+
+Game.prototype.addPlayer = function (seat) {
+
+    if( this.players.length < 4 && seat < 4) {
+        this.players[seat] = new Player(seat)
+    } else {
+        console.log("已满座")
+    }
 }
 
 Game.prototype.init = function () {
@@ -62,7 +73,7 @@ Game.prototype.start = function () {
 
 }
 
-// xi pai suan fa
+// 洗牌算法
 Game.prototype.stuffle = function () {
 
     for (var i = this.cards.length-1; i >=0; i--) {
@@ -104,7 +115,7 @@ Game.prototype.dealOneCard = function (i) {
 
         this.players.forEach(function(player) {
 
-            sortCards(player.cards)
+            player.divideCard(this.currentInfo.master)
         })
 
         this.setStage(STAGE.setHole);
@@ -119,7 +130,7 @@ Game.prototype.dealOneCard = function (i) {
 
 Game.prototype.setBanker = function (playerId) {
     this.currentInfo.banker = playerId;
-    this.current.startPlayer = playerId;
+    this.currentState.startPlayer = playerId;
     this.players[playerId].isBanker = true;
 }
 
@@ -144,29 +155,53 @@ Game.prototype.play = function (cards) {
 
     console.log('play');
 
-    return;
+    // return;
 
-
-    if(this.current.player === 0) {
-        this.showPlayPanel();
-    } else {
-        var selectCards = this.players[this.current.player].selectRandomCards();
-        this.players[this.current.player].playCard(selectCards);
-        this.current.cards.push(selectCards);
-        this.current.player = (this.current.player + 1) % 4;
-    }
-
-    if(this.current.cards.length === 4) {
+    if(this.currentState.cards.length === 4) {
         //...
         // next
+        console.log("\n----------------\n")
+
+        console.log("手牌:");
+
+        this.players.forEach(player => {
+            console.log("玩家 " + player.seat)
+            for (const key in player.groupedCards) {
+                if (player.groupedCards.hasOwnProperty(key)) {
+                    console.log(key + " : ", player.groupedCards[key].toString())
+                }
+            }
+        })
 
         if(this.players[0].cards.length === 0) {
 
             this.setStage(STAGE.end);
+            return;
         }
+    }
+
+    if(this.currentState.player === 0) {
+
+        this.showPlayPanel(() => {
+            this.play();
+        });
     } else {
+        var selectCards = this.players[this.currentState.player].selectRandomCards(this.currentState);
+        this.players[this.currentState.player].playCard(selectCards);
+        this.currentState.cards.push(selectCards);
+        this.currentState.player = (this.currentState.player + 1) % 4;
+
+        if(this.currentState.player === this.currentState.startPlayer){
+
+            this.currentState.group = pokers[selectCards[0]].isMaster ? "master" : pokers[selectCards[0]].suit;
+            this.currentState.type = pokerHelper.getCardType(selectCards);
+        }
+
+        console.log(this.currentState.player, "出牌: ", console.log(selectCards.map(cardIndex => pokers[cardIndex])))
+
         this.play();
     }
+
 
 
 
@@ -177,7 +212,10 @@ Game.prototype.end = function (cards) {
     console.log('end')
 }
 
-Game.prototype.showPlayPanel = function () {
+Game.prototype.showPlayPanel = function (callback) {
 
     console.log('showPlayPanel');
+
+
+    
 }
