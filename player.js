@@ -37,12 +37,22 @@ Player.prototype.playCard = function(cards) {
         return cards.indexOf(index) < 0
     })
 
+    cards.forEach(cardIndex => {
+
+        this.groupedCards[pokers[cardIndex].group].splice(this.groupedCards[pokers[cardIndex].group].indexOf(cardIndex), 1)
+    })
+
     this.selectCards = [];
 }
 
 Player.prototype.setHoleCards = function(cards) {
     this.cards = this.cards.filter(function(_, index) {
         return cards.indexOf(index) < 0
+    })
+
+    cards.forEach(cardIndex => {
+
+        this.groupedCards[pokers[cardIndex].group].splice(this.groupedCards[pokers[cardIndex].group].indexOf(cardIndex), 1)
     })
 }
 
@@ -62,18 +72,20 @@ Player.prototype.clearCard = function(cards) {
 
 Player.prototype.selectRandomCards = function(currentState) {
     
-    if(player.seat === currentState.startPlayer) {
+    if(this.seat === currentState.startPlayer) {
         
+        console.log("首出")
         var randomCardIndex = this.cards[Math.floor(Math.random() * this.cards.length)]
         this.selectCards.push(randomCardIndex)
     } else {
-
+        console.log("跟出")
         var len = this.groupedCards[currentState.group].length;
         if(len > 0) {
 
             if(currentState.cardType === 0) {
 
                 var randomCardIndex = this.groupedCards[currentState.group][Math.floor(Math.random() * len)]
+                console.log('玩家 ', player.seat, ' 随机选择牌: ', pokers[randomCardIndex])
                 this.selectCards.push(randomCardIndex)
             } else if(currentState.cardType === 1)  {
 
@@ -163,7 +175,7 @@ Player.prototype.selectRandomCards = function(currentState) {
 
             var randomIndex = Math.floor(Math.random() * (this.cards.length - currentState.cards[0].length + 1 ));
 
-            currentState.cards[0].length.forEach((_, i) => {
+            currentState.cards[0].forEach((_, i) => {
 
                 this.selectCards.push(this.cards[randomIndex + i])
             })
@@ -179,8 +191,10 @@ Player.prototype.divideCards = function(master) {
 
             this.groupedCards.master.push(cardIndex);
             pokers[cardIndex].isMaster = true;
+            pokers[cardIndex].group = 'master';
         } else {
             this.groupedCards[pokers[cardIndex].suit].push(cardIndex);
+            pokers[cardIndex].group = pokers[cardIndex].suit;
         }
     });
 

@@ -1,5 +1,7 @@
 var config = {
-    cardNum: 108
+    cardNum: 108, //总牌数
+    holeNum: 8, //底牌数
+    dealTimeout: 10 //发牌间隔ms
 }
 
 var STAGE = {
@@ -83,7 +85,7 @@ Game.prototype.stuffle = function () {
         this.cards[i] = itemAtIndex;
     }
 
-    console.log('cards', this.cards)
+    console.log('洗牌', this.cards)
 }
 
 Game.prototype.deal = function (callback) {
@@ -92,13 +94,16 @@ Game.prototype.deal = function (callback) {
 
 
 Game.prototype.dealOneCard = function (i) {
+
+    console.log("发牌", i)
     var card = this.cards[i];
 
     if (i < config.cardNum - 8) {
         this.players[i % 4].addCard(card)
     } else {
         if(this.currentInfo.banker === -1) {
-            this.setBanker(Math.floor( 4 * Math.random()))
+            // this.setBanker(Math.floor( 4 * Math.random()))
+            this.setBanker(0)
         }
         if(this.currentInfo.master === null) {
             this.currentInfo.master = 'hearts'
@@ -125,12 +130,13 @@ Game.prototype.dealOneCard = function (i) {
 
     setTimeout(() => {
         this.dealOneCard.call(this, i)
-    }, 50);
+    }, config.dealTimeout);
 }
 
 Game.prototype.setBanker = function (playerId) {
     this.currentInfo.banker = playerId;
     this.currentState.startPlayer = playerId;
+    this.currentState.player = playerId;
     this.players[playerId].isBanker = true;
 }
 
@@ -142,23 +148,74 @@ Game.prototype.setMasterCard = function (master) {
 Game.prototype.setHoleCards = function (player, cards) {
     player.setHoleCards(cards);
     this.currentInfo.holeCards = cards;
-
+    console.log("扣底: ", cards)
     this.setStage(STAGE.play)
 }
 
 Game.prototype.setHole = function() {
 
-    console.log('setHole');
+    //假设默认玩家为庄家
+    console.log('请扣底: ');
+
+    var playCardButton = document.getElementById("playCard");
+    playCardButton.innerHTML = "扣底"
+    playCardButton.style.display = "inline-block";
+
+    playCardButton.onclick = () => {
+
+        var selectCards = document.getElementById("selectCardIndex").value;
+    
+        selectCards = selectCards.split(",")
+        selectCards.forEach((cardIndex, i) => {
+            selectCards[i] = Number(cardIndex)
+        });
+
+        if(selectCards.length === config.holeNum) {
+            this.setHoleCards(this.players[0], selectCards);
+
+            console.log("\n----------------\n")
+
+            console.log("手牌:");
+
+            this.players.forEach(player => {
+                console.log("玩家 " + player.seat)
+                for (const key in player.groupedCards) {
+                    if (player.groupedCards.hasOwnProperty(key)) {
+                        console.log(key + " : ", player.groupedCards[key].toString())
+                    }
+                }
+            })
+
+        } else {
+            console.log("牌数必须为" + config.holeNum +"张")
+        }
+    }
 }
 
 Game.prototype.play = function (cards) {
 
     console.log('play');
 
+    console.log("\n----------------\n")
+
+    console.log("手牌:");
+
+    this.players.forEach(player => {
+        console.log("玩家 " + player.seat)
+        for (const key in player.groupedCards) {
+            if (player.groupedCards.hasOwnProperty(key)) {
+                console.log(key + " : ", player.groupedCards[key].toString())
+            }
+        }
+    })
+
+    console.log('本轮信息', this.currentState)
+    console.log('本轮出牌者: 玩家', this.currentState.player)
     // return;
 
     if(this.currentState.cards.length === 4) {
         //...
+        //本轮结算
         // next
         console.log("\n----------------\n")
 
@@ -179,12 +236,22 @@ Game.prototype.play = function (cards) {
             return;
         }
 
-        return; // 测试只打一轮
+        this.currentState = {
+            startPlayer: 0, //第一个出牌人
+            cards: [], //已出牌
+            group: "", //首出牌种类
+            cardType: -1, // 首出牌牌型
+            player: 0, //出牌人
+            scroe: 0, // 本轮中的分数
+            bigCardPlayer: -1, //出牌中最大者
+        }
+        // return; // 测试只打一轮
     }
 
     if(this.currentState.player === 0) {
 
         this.showPlayPanel((selectCards) => {
+
             this.players[0].playCard(selectCards);
             this.currentState.cards.push(selectCards);
 
@@ -194,14 +261,18 @@ Game.prototype.play = function (cards) {
                 this.currentState.cardType = pokerHelper.getCardType(selectCards);
             }
 
-            console.log(this.currentState.player, "出牌: ", console.log(selectCards.map(cardIndex => pokers[cardIndex])))
+            console.log(this.currentState.player, "出牌: ", selectCards)
 
             this.currentState.player = (this.currentState.player + 1) % 4;
 
             this.play();
         });
     } else {
-        var selectCards = this.players[this.currentState.player].selectRandomCards(this.currentState);
+        this.players[this.currentState.player].selectRandomCards(this.currentState);
+        var selectCards = this.players[this.currentState.player].selectCards;
+
+        console.log("随机选牌:", selectCards)
+
         this.players[this.currentState.player].playCard(selectCards);
         this.currentState.cards.push(selectCards);
 
@@ -211,7 +282,7 @@ Game.prototype.play = function (cards) {
             this.currentState.cardType = pokerHelper.getCardType(selectCards);
         }
  
-        console.log(this.currentState.player, "出牌: ", console.log(selectCards.map(cardIndex => pokers[cardIndex])))
+        console.log(this.currentState.player, "出牌: ", selectCards)
 
         this.currentState.player = (this.currentState.player + 1) % 4;
 
@@ -233,6 +304,7 @@ Game.prototype.showPlayPanel = function (callback) {
     console.log('showPlayPanel', '你出牌: ');
 
     var playCardButton = document.getElementById("playCard");
+    playCardButton.innerHTML = "出牌"
     playCardButton.style.display = "inline-block";
 
     playCardButton.onclick = () => {
@@ -248,9 +320,9 @@ Game.prototype.showPlayPanel = function (callback) {
         //判断出牌是否符合规则
         if(pokerHelper.isValidCard(selectCards, this.currentState)){
 
-            callback.call(null, selectCards)
+            callback(selectCards)
     
-            playCardButton.style.display = "none";
+            // playCardButton.style.display = "none";
         } else {
             console.log("出牌不符合规则")
         }

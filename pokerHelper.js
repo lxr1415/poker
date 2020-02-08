@@ -283,7 +283,8 @@ window.pokerHelper = {};
             return false 
         }
 
-
+        //假设跟出是符合规则的
+        return true;
 
         //跟出
 
