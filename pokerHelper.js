@@ -34,7 +34,7 @@ window.pokerHelper = {};
         var suits = ['hearts', 'diamonds', 'spades', 'clubs'];
         var points = ['3', '4', '5', '6', '7', '8', '9', '10', 'j', 'q', 'k', 'a'];
     
-        var size = 40;
+        var size = 50;
     
     
         //生成52张牌
@@ -63,15 +63,15 @@ window.pokerHelper = {};
             pokers.push({
                 suit: suits[i],
                 point: '2',
-                defaultValue: 15,
-                value: 15,
+                defaultValue: 27,
+                value: 27,
                 image: Poker.getCardImage(size, suits[i], '2')
             })
             pokers.push({
                 suit: suits[i],
                 point: '2',
-                defaultValue: 15,
-                value: 15,
+                defaultValue: 27,
+                value: 27,
                 image: Poker.getCardImage(size, suits[i], '2')
             })
         }
@@ -80,15 +80,15 @@ window.pokerHelper = {};
         pokers.push({
             suit: 'nt',
             point: '0',
-            defaultValue: 19,
-            value: 19,
+            defaultValue: 31,
+            value: 31,
             image: Poker.getCardImage(size, 'spades', 'joker')
         })
         pokers.push({
             suit: 'nt',
             point: '0',
-            defaultValue: 19,
-            value: 19,
+            defaultValue: 31,
+            value: 31,
             image: Poker.getCardImage(size, 'spades', 'joker')
         })
     
@@ -96,15 +96,15 @@ window.pokerHelper = {};
         pokers.push({
             suit: 'nt',
             point: '1',
-            defaultValue: 20,
-            value: 20,
+            defaultValue: 32,
+            value: 32,
             image: Poker.getCardImage(size, 'hearts', 'joker')
         })
         pokers.push({
             suit: 'nt',
             point: '1',
-            defaultValue: 20,
-            value: 20,
+            defaultValue: 32,
+            value: 32,
             image: Poker.getCardImage(size, 'hearts', 'joker')
         })
     

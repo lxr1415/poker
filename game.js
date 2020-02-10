@@ -127,6 +127,8 @@ Game.prototype.dealOneCard = function (i) {
             player.divideCards(this.currentInfo.master)
         })
 
+        this.addCardToDom();
+
         this.setStage(STAGE.setHole);
         return ;
     }
@@ -165,17 +167,54 @@ Game.prototype.setHole = function() {
     playCardButton.innerHTML = "扣底"
     playCardButton.style.display = "inline-block";
 
+    var player = this.players[this.currentInfo.banker];
+
+    var cardsBox = document.getElementsByClassName("card" + player.seat + "-box");
+
+    console.log(cardsBox)
+
+    for (let i = cardsBox.length - 1; i >= 0; i--) {
+        const cardBox = cardsBox[i];
+        
+        cardBox.onclick = function () {
+
+            console.log(this);
+
+            var cardIndex = this.getAttribute("data-cardindex");
+            console.log(cardIndex)
+
+            var childNodes = this.childNodes;
+
+            var img = childNodes[0];
+
+            if(img.tagName === "IMG") {
+
+
+                if(img.style.top === "-10px"){
+                    img.style.top = "0"
+
+                    player.selectCards.splice(player.selectCards.indexOf(cardIndex), 1);
+                } else {
+
+                    img.style.top = "-10px"
+                    player.selectCards.push(cardIndex);
+                }
+            }
+
+            console.log(player.selectCards)
+
+            
+        }
+    }
+    
+
     playCardButton.onclick = () => {
 
-        var selectCards = document.getElementById("selectCardIndex").value;
+        var selectCards = player.selectCards;
     
-        selectCards = selectCards.split(",")
-        selectCards.forEach((cardIndex, i) => {
-            selectCards[i] = Number(cardIndex)
-        });
-
         if(selectCards.length === config.holeNum) {
-            this.setHoleCards(this.players[0], selectCards);
+
+            this.setHoleCards(player, selectCards);
 
             console.log("\n----------------\n")
 
@@ -190,8 +229,20 @@ Game.prototype.setHole = function() {
                 }
             })
 
+            document.getElementById("message").innerHTML = "";
+
+            player.selectCards.forEach(cardIndex => {
+
+                var cardBox = Array.prototype.find.call(cardsBox, cardBox => cardBox.getAttribute("data-cardindex") == cardIndex)
+                
+                cardBox.remove();
+            })
+
+            player.selectCards = [];
+            
         } else {
             console.log("牌数必须为" + config.holeNum +"张")
+            document.getElementById("message").innerHTML = "牌数必须为" + config.holeNum +"张";
         }
     }
 }
@@ -311,15 +362,11 @@ Game.prototype.showPlayPanel = function (callback) {
     playCardButton.innerHTML = "出牌"
     playCardButton.style.display = "inline-block";
 
+    var player = this.players[0];
+
     playCardButton.onclick = () => {
 
-        var selectCards = document.getElementById("selectCardIndex").value;
-    
-        selectCards = selectCards.split(",")
-        selectCards.forEach((cardIndex, i) => {
-            selectCards[i] = Number(cardIndex)
-        });
-
+        var selectCards = player.selectCards;
 
         //判断出牌是否符合规则
         if(pokerHelper.isValidCard(selectCards, this.currentState)){
@@ -327,6 +374,18 @@ Game.prototype.showPlayPanel = function (callback) {
             callback(selectCards)
     
             // playCardButton.style.display = "none";
+
+            var cardsBox = document.getElementsByClassName("card" + player.seat + "-box");
+
+            selectCards.forEach(cardIndex => {
+
+                var cardBox = Array.prototype.find.call(cardsBox, cardBox => cardBox.getAttribute("data-cardindex") == cardIndex)
+                
+                cardBox.remove();
+            })
+
+            selectCards = [];
+
         } else {
             console.log("出牌不符合规则")
         }
@@ -334,9 +393,29 @@ Game.prototype.showPlayPanel = function (callback) {
 
 }
 
+
+//每发一张牌就应该加入dom中显示出来，以便亮主、抢庄。此处先不考虑，默认玩家为庄家。
 Game.prototype.addCardToDom = function () {
+
     this.players.forEach(player => {
 
-        
+        var palyerCardBox = document.getElementById("player" + player.seat + "-card");
+
+        for (const key in player.groupedCards) {
+            if (player.groupedCards.hasOwnProperty(key)) {
+                const element = player.groupedCards[key];
+                
+                for (let i = element.length - 1; i >= 0; i--) {
+                    const cardIndex = element[i];
+                    var div = document.createElement("div");
+                    div.style.display = "inline-block";
+                    div.setAttribute("class", "card-box card" + player.seat + "-box");
+                    div.setAttribute("data-cardindex", cardIndex);
+                    div.appendChild(pokers[cardIndex].image)
+
+                    palyerCardBox.appendChild(div)
+                }
+            }
+        }
     })
 }

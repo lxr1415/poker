@@ -11,7 +11,7 @@
 
 #game-box {
     width: 800px;
-    height: 600px;
+    height: 630px;
     border: 1px solid #000;
     margin: 0 auto;
 }
@@ -46,16 +46,25 @@
     text-align: center;
 }
 
-#card-box {
-    height: 50px;
-    border: 1px solid #000;
-}
 
-
-
-
-#player2-card, #player3-card, #player1-card {
+#player2-card, #player3-card, #player1-card,#player0-card {
     height: 50px;
     margin: 20px;
     border: 1px solid #000;
+    position: relative;
+}
+
+.card-box {
+    width: 20px;
+    height: 50px;
+    position: relative;
+}
+
+.card-box img {
+    position: absolute;
+    top: 0;
+}
+
+#message{
+    color: red;
 }
