@@ -1,0 +1,61 @@
+
+
+.float-left {
+    float: left;
+}
+
+.float-right {
+    float: right;
+}
+
+
+#game-box {
+    width: 800px;
+    height: 600px;
+    border: 1px solid #000;
+    margin: 0 auto;
+}
+
+#player1, #player2, #player3 {
+    width: 80px;
+    height: 50px;
+    border: 1px solid #000;
+}
+
+#player2, #playCard2, #playCard0, #playCardPanel, #card-box {
+    margin: 10px auto;
+}
+
+#player23-box {
+    width: 100%;
+    height: 200px;
+    margin-bottom: 20px;
+}
+
+#player3-box, #player1-box {
+    width: 49%;
+    border: 1px solid #000;
+}
+
+#playCard0, #playCard1, #playCard2, #playCard3 {
+    height: 50px;
+    border: 1px solid #000;
+}
+
+#playCardPanel {
+    text-align: center;
+}
+
+#card-box {
+    height: 50px;
+    border: 1px solid #000;
+}
+
+
+
+
+#player2-card, #player3-card, #player1-card {
+    height: 50px;
+    margin: 20px;
+    border: 1px solid #000;
+}

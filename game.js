@@ -333,3 +333,10 @@ Game.prototype.showPlayPanel = function (callback) {
     }
 
 }
+
+Game.prototype.addCardToDom = function () {
+    this.players.forEach(player => {
+
+        
+    })
+}

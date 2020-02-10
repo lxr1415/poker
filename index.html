@@ -5,10 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+
+    <link rel="stylesheet" href="./index.css">
 </head>
 <body>
 
-    <input type="text" id="selectCardIndex"><button id="playCard">出牌</button>
+    <div id="game-box">
+
+        <div id="player2">
+            玩家2
+        </div>
+        <div id="player2-card"></div>
+
+        <div id="playCard2"></div>
+
+        <div id="player23-box">
+
+            <div id="player3-card"></div>
+
+            <div id="player3-box" class="float-left">
+                <div id="player3"  class="float-left">
+                    玩家3
+                </div>
+                <div id="playCard3" class="float-right"></div>
+            </div>
+            <div id="player1-box" class="float-right">
+                <div id="player1" class="float-right">
+                    玩家1
+                </div>
+                <div id="playCard1" class="float-left"></div>
+            </div>
+
+            <div id="player1-card" class="float-right"></div>
+        </div>
+
+        <div id="playCard0"></div>
+        <div id="playCardPanel">
+            <button id="playCard">发牌</button>
+        </div>
+        <div id="card-box">
+
+        </div>
+
+    </div>
+
+
+
+
+    <!-- <input type="text" id="selectCardIndex"><button id="playCard">出牌</button> -->
 
     <script src="./source/poker.js"></script>
     <script src="./game.js"></script>
