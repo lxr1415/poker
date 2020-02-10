@@ -66,10 +66,14 @@ Game.prototype.init = function () {
     });
     this.currentInfo.score = 0;
     this.currentInfo.holeCards = [];
-    this.start();
+    this.run();
 }
 
 Game.prototype.start = function () {
+    this.setStage(0);
+}
+
+Game.prototype.run = function () {
     this.stuffle();
     this.deal(); 
 
