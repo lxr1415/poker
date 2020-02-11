@@ -31,23 +31,32 @@ Player.prototype.addCard = function(card) {
     }
 }
 
-Player.prototype.playCard = function(cards) {
+Player.prototype.playCard = function() {
 
-    this.cards = this.cards.filter(function(_, index) {
-        return cards.indexOf(index) < 0
+    this.cards = this.cards.filter((cardIndex) => {
+        return this.selectCards.indexOf(cardIndex) < 0
     })
 
-    cards.forEach(cardIndex => {
+    var palyCardBox = document.getElementById("playCard" + this.seat);
+    var cardsBox = document.getElementsByClassName("card" + this.seat + "-box");
 
+    for (let i = this.selectCards.length - 1; i >= 0 ; i--) {
+
+        const cardIndex = this.selectCards[i];
         this.groupedCards[pokers[cardIndex].group].splice(this.groupedCards[pokers[cardIndex].group].indexOf(cardIndex), 1)
-    })
+
+        var cardBox = Array.prototype.find.call(cardsBox, cardBox => cardBox.getAttribute("data-cardindex") == cardIndex)
+        console.log(cardIndex, cardBox)
+        palyCardBox.appendChild(cardBox)
+      
+    }
 
     this.selectCards = [];
 }
 
 Player.prototype.setHoleCards = function(cards) {
-    this.cards = this.cards.filter(function(_, index) {
-        return cards.indexOf(index) < 0
+    this.cards = this.cards.filter(function(cardIndex) {
+        return cards.indexOf(cardIndex) < 0
     })
 
     cards.forEach(cardIndex => {
@@ -70,7 +79,7 @@ Player.prototype.clearCard = function(cards) {
     this.isBanker = false;
 }
 
-Player.prototype.selectRandomCards = function(currentState) {
+Player.prototype.selectRandomCards = function(currentState, levelPoint) {
     
     if(this.seat === currentState.startPlayer) {
         
@@ -80,8 +89,10 @@ Player.prototype.selectRandomCards = function(currentState) {
     } else {
         console.log("跟出")
         var len = this.groupedCards[currentState.group].length;
+        var needLen = currentState.cards[0].length;
         if(len > 0) {
 
+            //跟一张单牌
             if(currentState.cardType === 0) {
 
                 var randomCardIndex = this.groupedCards[currentState.group][Math.floor(Math.random() * len)]
@@ -91,16 +102,19 @@ Player.prototype.selectRandomCards = function(currentState) {
 
                 if(len > 1) {
 
-                    var randomCardIndex = this.groupedCards[currentState.group].findIndex((_, i) =>{
+                    // 查找对子
+                    var index = this.groupedCards[currentState.group].findIndex((cardIndex, i) =>{
 
-                        return i < len - 1 && pokers[i].value === pokers[i + 1].value
+                        return i < len - 1 
+                        && 1 === pokerHelper.getCardType([cardIndex, this.groupedCards[currentState.group][i + 1]], levelPoint)
                     })
 
-                    if(randomCardIndex >= 0) {
+                    // 有对子出对子
+                    if(index >= 0) {
 
                         this.selectCards.push(
-                            this.groupedCards[currentState.group][randomCardIndex], 
-                            this.groupedCards[currentState.group][randomCardIndex + 1]
+                            this.groupedCards[currentState.group][index], 
+                            this.groupedCards[currentState.group][index + 1]
                         )
                     } else {
 
@@ -111,6 +125,7 @@ Player.prototype.selectRandomCards = function(currentState) {
                     }
                 } else {
 
+                    // 只剩一张牌，选择剩余的牌，加上相邻的一张牌。
                     this.selectCards.push(this.groupedCards[currentState.group][0])
 
                     var index = this.cards.findIndex((cardIndex) => 
@@ -126,33 +141,78 @@ Player.prototype.selectRandomCards = function(currentState) {
 
             } else if(currentState.cardType === 2)  {
 
-                if(len >= currentState.cards[0].length) {
+                if(len >= needLen) {
 
+                    //查找拖拉机
                     var randomCardIndex = this.groupedCards[currentState.group].findIndex((_, i) =>{
 
-                        return i < len - currentState.cards[0].length 
-                                && pokerHelper.getCardType(this.groupedCards[currentState.group].slice(i, i + currentState.cards[0].length - 1)) === 2
+                        return i < len - needLen 
+                                && pokerHelper.getCardType(this.groupedCards[currentState.group].slice(i, i + needLen - 1)) === 2
                     })
 
+                    // 有拖拉机出拖拉机
                     if(randomCardIndex >= 0) {
 
-                        currentState.cards[0].length.forEach((_, i) => {
+                        currentState.cards[0].forEach((_, i) => {
 
                             this.selectCards.push(this.groupedCards[currentState.group][randomIndex + i])
                         })
                     } else {
-                        currentState.cards[0].forEach((_, i) => {
 
-                            this.selectCards.push(this.groupedCards[currentState.group][i])
+                        // 无拖拉机时，查找对子
+                        this.groupedCards[currentState.group].forEach((cardIndex, i) =>{
+
+                            if(
+                                this.selectCards.length < needLen
+                                && i < len - 1 
+                                && 1 === pokerHelper.getCardType([cardIndex, this.groupedCards[currentState.group][i + 1]], levelPoint)
+                            ) {
+
+                                this.selectCards.push(
+                                    this.groupedCards[currentState.group][i], 
+                                    this.groupedCards[currentState.group][i + 1]
+                                )
+                            }
                         })
+
+                        if(this.selectCards.length < needLen){
+                            //无对子时，任选相同花色和牌数的牌
+                            if(this.selectCards.length === 0) {
+                                currentState.cards[0].forEach((_, i) => {
+
+                                    this.selectCards.push(this.groupedCards[currentState.group][i])
+                                })
+                            } else {
+
+                                //从剩余牌中选择需要补上的牌数
+                                var copyCards = JSON.parse(JSON.stringify(this.groupedCards[currentState.group]));
+
+                                this.selectCards.forEach(cardIndex => {
+            
+                                    copyCards.splice(copyCards.indexOf(cardIndex), 1)
+                                })
+            
+                                var leastNum = needLen - this.selectCards.length;
+            
+                                var randomIndex = Math.floor(Math.random() * (copyCards.length - leastNum ));
+            
+                                for (var i = 0; i < leastNum; i++) {
+                                    this.selectCards.push(copyCards[randomIndex + i])
+                                }
+                            }
+                        }
+                       
+                        
                     }
                 } else {
 
+                    // 该花色的牌全打出
                     this.groupedCards[currentState.group].forEach((_, i) => {
 
                         this.selectCards.push(this.groupedCards[currentState.group][i])
                     })
 
+                    //从其他花色牌中选择需要补上的牌数
                     var copyCards = JSON.parse(JSON.stringify(this.cards));
 
                     this.selectCards.forEach(cardIndex => {
@@ -160,12 +220,12 @@ Player.prototype.selectRandomCards = function(currentState) {
                         copyCards.splice(copyCards.indexOf(cardIndex), 1)
                     })
 
-                    var leastNum = currentState.cards[0].length - this.selectCards.length;
+                    var leastNum = needLen - this.selectCards.length;
 
-                    var randomIndex = Math.floor(Math.random() * (copyCards.length - leastNum + 1 ));
+                    var randomIndex = Math.floor(Math.random() * (copyCards.length - leastNum ));
 
                     for (var i = 0; i < leastNum; i++) {
-                        this.selectCards.push(this.cards[randomIndex + i])
+                        this.selectCards.push(copyCards[randomIndex + i])
                     }
 
                 }
@@ -173,7 +233,7 @@ Player.prototype.selectRandomCards = function(currentState) {
 
         } else { //随机出牌, 垫牌
 
-            var randomIndex = Math.floor(Math.random() * (this.cards.length - currentState.cards[0].length + 1 ));
+            var randomIndex = Math.floor(Math.random() * (this.cards.length - needLen ));
 
             currentState.cards[0].forEach((_, i) => {
 

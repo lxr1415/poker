@@ -22,8 +22,13 @@
     border: 1px solid #000;
 }
 
-#player2, #playCard2, #playCard0, #playCardPanel, #card-box {
+#player2, #playCard2, #playCard0, #playCardPanel {
     margin: 10px auto;
+}
+
+
+#playCard0, #playCard2 {
+    text-align: center;
 }
 
 #player23-box {
@@ -33,13 +38,11 @@
 }
 
 #player3-box, #player1-box {
-    width: 49%;
-    border: 1px solid #000;
+    width: 40%;
 }
 
 #playCard0, #playCard1, #playCard2, #playCard3 {
     height: 50px;
-    border: 1px solid #000;
 }
 
 #playCardPanel {
@@ -50,14 +53,25 @@
 #player2-card, #player3-card, #player1-card,#player0-card {
     height: 50px;
     margin: 20px;
-    border: 1px solid #000;
     position: relative;
+}
+
+#player1-card {
+    clear: both;
+    text-align: right;
+    margin-top: 90px;
+    margin-right: 40px;
+}
+
+#player2-card, #player0-card {
+    text-align: center;
 }
 
 .card-box {
     width: 20px;
     height: 50px;
     position: relative;
+    text-align: left;
 }
 
 .card-box img {

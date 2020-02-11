@@ -1,7 +1,9 @@
 var config = {
     cardNum: 108, //总牌数
     holeNum: 8, //底牌数
-    dealTimeout: 10 //发牌间隔ms
+    dealTimeout: 10, //发牌间隔ms
+    defaultBanker: 0, //默认庄家
+    defaultMaster: "hearts", // 默认主牌花色
 }
 
 var STAGE = {
@@ -107,10 +109,10 @@ Game.prototype.dealOneCard = function (i) {
     } else {
         if(this.currentInfo.banker === -1) {
             // this.setBanker(Math.floor( 4 * Math.random()))
-            this.setBanker(0)
+            this.setBanker(config.defaultBanker)
         }
         if(this.currentInfo.master === null) {
-            this.currentInfo.master = 'hearts'
+            this.currentInfo.master = config.defaultMaster
         }
 
         this.players[this.currentInfo.banker].addCard(card)
@@ -171,17 +173,12 @@ Game.prototype.setHole = function() {
 
     var cardsBox = document.getElementsByClassName("card" + player.seat + "-box");
 
-    console.log(cardsBox)
-
     for (let i = cardsBox.length - 1; i >= 0; i--) {
         const cardBox = cardsBox[i];
         
         cardBox.onclick = function () {
 
-            console.log(this);
-
             var cardIndex = this.getAttribute("data-cardindex");
-            console.log(cardIndex)
 
             var childNodes = this.childNodes;
 
@@ -200,10 +197,6 @@ Game.prototype.setHole = function() {
                     player.selectCards.push(cardIndex);
                 }
             }
-
-            console.log(player.selectCards)
-
-            
         }
     }
     
@@ -257,6 +250,7 @@ Game.prototype.play = function (cards) {
 
     this.players.forEach(player => {
         console.log("玩家 " + player.seat)
+        console.log("cards", player.cards)
         for (const key in player.groupedCards) {
             if (player.groupedCards.hasOwnProperty(key)) {
                 console.log(key + " : ", player.groupedCards[key].toString())
@@ -278,6 +272,7 @@ Game.prototype.play = function (cards) {
 
         this.players.forEach(player => {
             console.log("玩家 " + player.seat)
+            console.log("cards", player.cards)
             for (const key in player.groupedCards) {
                 if (player.groupedCards.hasOwnProperty(key)) {
                     console.log(key + " : ", player.groupedCards[key].toString())
@@ -301,6 +296,7 @@ Game.prototype.play = function (cards) {
             bigCardPlayer: -1, //出牌中最大者
         }
         // return; // 测试只打一轮
+
     }
 
     if(this.currentState.player === 0) {
@@ -313,7 +309,7 @@ Game.prototype.play = function (cards) {
             if(this.currentState.player === this.currentState.startPlayer){
 
                 this.currentState.group = pokers[selectCards[0]].isMaster ? "master" : pokers[selectCards[0]].suit;
-                this.currentState.cardType = pokerHelper.getCardType(selectCards);
+                this.currentState.cardType = pokerHelper.getCardType(selectCards, this.currentInfo.level);
             }
 
             console.log(this.currentState.player, "出牌: ", selectCards)
@@ -334,7 +330,7 @@ Game.prototype.play = function (cards) {
         if(this.currentState.player === this.currentState.startPlayer){
 
             this.currentState.group = pokers[selectCards[0]].isMaster ? "master" : pokers[selectCards[0]].suit;
-            this.currentState.cardType = pokerHelper.getCardType(selectCards);
+            this.currentState.cardType = pokerHelper.getCardType(selectCards, this.currentInfo.level);
         }
  
         console.log(this.currentState.player, "出牌: ", selectCards)
@@ -354,40 +350,39 @@ Game.prototype.end = function (cards) {
     console.log('end')
 }
 
+
 Game.prototype.showPlayPanel = function (callback) {
 
     console.log('showPlayPanel', '你出牌: ');
 
-    var playCardButton = document.getElementById("playCard");
-    playCardButton.innerHTML = "出牌"
-    playCardButton.style.display = "inline-block";
+    playCardButton.innerHTML = "出牌";
 
     var player = this.players[0];
 
+    var flag = true;
+
     playCardButton.onclick = () => {
+
+        if(!flag) return;
+
+        clearPlayCard(); //清空牌桌上上一轮打的牌
 
         var selectCards = player.selectCards;
 
         //判断出牌是否符合规则
-        if(pokerHelper.isValidCard(selectCards, this.currentState)){
+        if(selectCards.length > 0 && pokerHelper.isValidCard(selectCards, player.groupedCards, this.currentState, this.currentInfo.level)){
 
             callback(selectCards)
     
-            // playCardButton.style.display = "none";
-
-            var cardsBox = document.getElementsByClassName("card" + player.seat + "-box");
-
-            selectCards.forEach(cardIndex => {
-
-                var cardBox = Array.prototype.find.call(cardsBox, cardBox => cardBox.getAttribute("data-cardindex") == cardIndex)
-                
-                cardBox.remove();
-            })
+            flag = false;
 
             selectCards = [];
+            document.getElementById("message").innerHTML = ""
 
         } else {
             console.log("出牌不符合规则")
+            document.getElementById("message").innerHTML = "出牌不符合规则";
+
         }
     }
 
@@ -401,21 +396,22 @@ Game.prototype.addCardToDom = function () {
 
         var palyerCardBox = document.getElementById("player" + player.seat + "-card");
 
-        for (const key in player.groupedCards) {
-            if (player.groupedCards.hasOwnProperty(key)) {
-                const element = player.groupedCards[key];
-                
-                for (let i = element.length - 1; i >= 0; i--) {
-                    const cardIndex = element[i];
-                    var div = document.createElement("div");
-                    div.style.display = "inline-block";
-                    div.setAttribute("class", "card-box card" + player.seat + "-box");
-                    div.setAttribute("data-cardindex", cardIndex);
-                    div.appendChild(pokers[cardIndex].image)
+        var suits = ['master', 'hearts', 'spades', 'diamonds', 'clubs'];
 
-                    palyerCardBox.appendChild(div)
-                }
+        suits.forEach(suit => {
+
+            const element = player.groupedCards[suit];
+                
+            for (let i = element.length - 1; i >= 0; i--) {
+                const cardIndex = element[i];
+                var div = document.createElement("div");
+                div.style.display = "inline-block";
+                div.setAttribute("class", "card-box card" + player.seat + "-box");
+                div.setAttribute("data-cardindex", cardIndex);
+                div.appendChild(pokers[cardIndex].image)
+
+                palyerCardBox.appendChild(div)
             }
-        }
+        })
     })
 }

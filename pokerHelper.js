@@ -31,7 +31,7 @@ window.pokerHelper = {};
     function createPoker() {
 
         var pokers = [];
-        var suits = ['hearts', 'diamonds', 'spades', 'clubs'];
+        var suits = ['hearts', 'spades', 'diamonds', 'clubs']; //红桃、黑桃、方块、梅花
         var points = ['3', '4', '5', '6', '7', '8', '9', '10', 'j', 'q', 'k', 'a'];
     
         var size = 50;
@@ -231,7 +231,9 @@ window.pokerHelper = {};
         if (cardIndexs.length === 1) {
     
             return 0;
-        } else if (cardIndexs.length === 2 && pokers[cardIndexs[0]].value === pokers[cardIndexs[1]].value
+        } else if (cardIndexs.length === 2
+             && pokers[cardIndexs[0]].value === pokers[cardIndexs[1]].value
+             && pokers[cardIndexs[0]].suit === pokers[cardIndexs[1]].suit
             ) {
     
             return 1;
@@ -241,15 +243,18 @@ window.pokerHelper = {};
     
                 const cardIndex = cardIndexs[i];
     
-                // 1.每两张牌point和value必相等
+                // 1.每两张牌point和value,suit必相等
                 // 2.相邻组牌value = 1或2,
                 // 相邻组牌value为1时, 是连对
                 // 相邻组牌value为2时, 小value + 1 = 级牌value
                 if (pokers[cardIndex].value !== pokers[cardIndexs[i - 1]].value
-                    || pokers[cardIndexs[i + 1]].value !== pokers[cardIndexs[i + 2]].value
+                    || pokers[cardIndex].suit !== pokers[cardIndexs[i - 1]].suit
                     || pokers[cardIndex].point !== pokers[cardIndexs[i - 1]].point
+                    || pokers[cardIndexs[i + 1]].value !== pokers[cardIndexs[i + 2]].value
+                    || pokers[cardIndexs[i + 1]].suit !== pokers[cardIndexs[i + 2]].suit
                     || pokers[cardIndexs[i + 1]].point !== pokers[cardIndexs[i + 2]].point
                     || pokers[cardIndexs[i + 1]].value - pokers[cardIndex].value > 2
+                    || pokers[cardIndexs[i + 1]].value - pokers[cardIndex].value === 0
                     || pokers[cardIndexs[i + 1]].value - pokers[cardIndex].value === 2 && pokers[cardIndex].value + 1 !== levelPoint) {
     
                     return -1
@@ -270,45 +275,125 @@ window.pokerHelper = {};
      *      垫牌,无首出者所出花色牌,可出其他副牌垫牌,此牌小于首出者
      *      毙牌,无首出者所出花色牌时,可出与首出一致的牌型的主牌,此牌大于首出者
      * 
-     * @param {array} cardIndexs 已选牌索引数组
-     * @param {boolean} isStartPlayer 是否首出
-     * @param {number} master 主牌类型
-     * @param {number} level 级牌
+     * @param {array} selectCards 已选牌索引数组
+     * @param {array} groupedCards 已分组手牌
+     * @param {object} currentState 当前轮次信息
      */
-    function isValidCard( selectCards, currentState ) {
+    function isValidCard( selectCards, groupedCards, currentState, levelPoint ) {
     
         //首出
         //不符合牌型
-        if(currentState.startPlayer === currentState.player && getCardType(selectCards) < 0) {
-            return false 
+        if(currentState.startPlayer === currentState.player) {
+            
+            return getCardType(selectCards, levelPoint) >= 0 
         }
 
         //假设跟出是符合规则的
-        return true;
+        // return true;
 
         //跟出
 
-        if(currentState.cardType === 0) {
+        //牌数不相等
+        if(currentState.cards[0].length !== selectCards.length) {
+            return false;
+        }
 
+        sortCards(selectCards);
+
+        var group = currentState.group; //首出牌种类
+
+        //手中无首出牌种类的牌， 可出任意牌
+        if(groupedCards[group].length === 0) {
+            return true
+        }
+
+        
+        // 手牌中的首出牌种类牌数小于等于需出牌数，但还存在此类牌，需保证全部打出，垫牌。
+        if(groupedCards[group].length > 0 && groupedCards[group].length <= currentState.cards[0].length) {
+
+            var num = 0;
+            selectCards.forEach(cardIndex => {
+
+                if(pokers[cardIndex].group === group) {
+                    num++;
+                }
+            })
+
+            return num === groupedCards[group].length;
+        }
+
+        // 手牌中的首出牌种类牌数大于需出牌数, 需要保证花色相同。
+        if(groupedCards[group].length > currentState.cards[0].length){
+
+            var num = 0;
             
-        } else if(currentState.cardType === 1)  {
+            if(selectCards.find(cardIndex => pokers[cardIndex].group !== group)) {
 
-            if(len > 1) {
+                return false
+            }
+        }
 
-               
-            } else {
 
-              
+        // 牌数花色都一致的情况下，牌型也相同，则一定符合规则
+        if(getCardType(selectCards, levelPoint) === currentState.cardType) {
+            return true
+        }
+        
+
+        // 牌数花色都一致的情况下，首出者出拖拉机、对子时，有拖拉机必须出拖拉机，有对子必须出对子。
+        if(currentState.cardType === 1)  {
+
+            for (let i = 0; i < groupedCards[group].length - 1; i++) {
+                
+                // 有对子未出对子
+                if(getCardType([groupedCards[group][i], groupedCards[group][i +1]], levelPoint ) === 1) {
+
+                    return false
+                }
             }
 
         } else if(currentState.cardType === 2)  {
 
-            if(len >= currentState.cards[0].length) {
+            var testCards;
 
-               
-            } else {
+            for (let i = 0; i < groupedCards[group].length - currentState.cards[0].length + 1; i++) {
+                
+                testCards = [];
+                currentState.cards[0].forEach((_, j) => {
+                    testCards.push(groupedCards[group][i + j])
+                });
+                
+                console.log({testCards})
+                // 有拖拉机时未出拖拉机
+                if(getCardType(testCards, levelPoint) === 2) {
 
+                    return false
+                }
+            }
 
+            // 有对子时 未出对子
+
+            var num = 0; //所出对子数
+            
+            selectCards.forEach((cardIndex, i) => {
+
+                if(i < selectCards.length - 1 && pokers[cardIndex].value === pokers[selectCards[i + 1]].value){
+                    num++;
+                }
+            });
+
+            
+            var allNum = 0; //手牌对子数
+            groupedCards[group].forEach((cardIndex, i) => {
+
+                if(i < groupedCards[group].length - 1 && pokers[cardIndex].value === pokers[groupedCards[group][i + 1]].value){
+                    allNum++;
+                }
+            });
+
+            //未全出对子, 且手中还有对子
+            if(2 * num < selectCards.length &&  num < allNum) {
+                return false;
             }
         }
     }
@@ -341,8 +426,8 @@ window.pokerHelper = {};
     function compare(cardIndexs1, cardIndexs2, levelPoint, master) {
     
     
-        var cardType1 = getCardType(cardIndexs1, levelPoint, master);
-        var cardType2 = getCardType(cardIndexs2, levelPoint, master);
+        var cardType1 = getCardType(cardIndexs1, levelPoint);
+        var cardType2 = getCardType(cardIndexs2, levelPoint);
     
         var isMaster1 = isMaster(cardIndexs1, levelPoint, master);
         var isMaster2 = isMaster(cardIndexs2, levelPoint, master);
@@ -369,7 +454,14 @@ window.pokerHelper = {};
     function sortCards(cardIndexs) {
     
         cardIndexs.sort(function(a, b) {
-            return pokers[a].value - pokers[b].value
+
+            if(pokers[a].value - pokers[b].value > 0) {
+                return 1
+            } else if(pokers[a].value - pokers[b].value < 0){
+                return -1
+            } else {
+                return b - a
+            }
         })
     }
 
