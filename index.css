@@ -10,10 +10,10 @@
 
 
 #game-box {
+    float: left;
     width: 800px;
     height: 630px;
     border: 1px solid #000;
-    margin: 0 auto;
 }
 
 #player1, #player2, #player3 {
@@ -81,4 +81,9 @@
 
 #message{
     color: red;
+}
+
+
+#gameInfo {
+    float: left;
 }

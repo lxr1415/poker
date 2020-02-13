@@ -25,7 +25,8 @@ window.pokerHelper = {};
         isValidCard,
         isMaster,
         compare,
-        sortCards
+        sortCards,
+        getScore
     }
 
     function createPoker() {
@@ -243,7 +244,7 @@ window.pokerHelper = {};
     
                 const cardIndex = cardIndexs[i];
     
-                // 1.每两张牌point和value,suit必相等
+                // 1.每两张牌point和value,suit必相等 
                 // 2.相邻组牌value = 1或2,
                 // 相邻组牌value为1时, 是连对
                 // 相邻组牌value为2时, 小value + 1 = 级牌value
@@ -463,6 +464,28 @@ window.pokerHelper = {};
                 return b - a
             }
         })
+    }
+
+    /**
+     * 统计一组牌中的分数
+     * @param {Array} cardIndexs 
+     */
+    function getScore(cardIndexs) {
+
+        var score = 0;
+        cardIndexs.forEach(cardIndex => {
+
+            if (pokers[cardIndex].point === "5") {
+                score += 5
+            } 
+            else if (  pokers[cardIndex].point === "10"
+                || pokers[cardIndex].point === "k"
+            ){
+                score += 10;
+            }
+        })
+
+        return score;
     }
 
 })()
