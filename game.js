@@ -1,7 +1,8 @@
 var config = {
     cardNum: 108, //总牌数
     holeNum: 8, //底牌数
-    dealTimeout: 10, //发牌间隔ms
+    dealTimeout: 20, //发牌间隔ms
+    playTimeout: 2000, //打牌间隔ms
     defaultBanker: 0, //默认庄家
     defaultMaster: "hearts", // 默认主牌花色
 }
@@ -80,6 +81,9 @@ Game.prototype.init = function () {
    
     this.currentInfo.score = 0;
     this.currentInfo.holeCards = [];
+
+    pokerHelper.setPokersValue(this.currentInfo.level, this.currentInfo.master)
+
     this.run();
 }
 
@@ -104,6 +108,8 @@ Game.prototype.stuffle = function () {
 }
 
 Game.prototype.deal = function (callback) {
+
+
     this.dealOneCard(0)
 }
 
@@ -115,6 +121,8 @@ Game.prototype.dealOneCard = function (i) {
 
     if (i < config.cardNum - 8) {
         this.players[i % 4].addCard(card)
+        this.players[i % 4].divideCards(this.currentInfo.master);
+        this.addCardToDom(i % 4);
     } else {
         if(this.currentInfo.banker === -1) {
             // this.setBanker(Math.floor( 4 * Math.random()))
@@ -131,12 +139,19 @@ Game.prototype.dealOneCard = function (i) {
 
         console.log('players', this.players);
 
-        pokerHelper.setPokersValue(this.currentInfo.level, this.currentInfo.master)
-
         this.players.forEach(player => {
 
-            player.divideCards(this.currentInfo.master)
+            player.divideCards(this.currentInfo.master);
         })
+        // if (this.currentInfo.master !== "nt"){
+
+        //     this.players.forEach(player => {
+
+        //         player.divideCards(this.currentInfo.master)
+        //         player.groupedCards.master = player.groupedCards.master.concat(player.groupedCards[this.currentInfo.master]);
+        //         player.groupedCards[this.currentInfo.master] = [];
+        //     })
+        // }
 
         this.addCardToDom();
 
@@ -161,17 +176,36 @@ Game.prototype.setBanker = function (playerId) {
 
 
 Game.prototype.setMasterCard = function (master) {
-    this.currentInfo.master = master;
+
+    this.currentInfo.master = master; 
+    
+    pokerHelper.setPokersValue(this.currentInfo.level, this.currentInfo.master);
 
     gameInfoDom.currentInfo.master.innerHTML = master;
 }
 
 Game.prototype.setHoleCards = function (player, cards) {
+
     player.setHoleCards(cards);
     this.currentInfo.holeCards = cards;
     console.log("扣底: ", cards)
 
-    gameInfoDom.currentInfo.holeCards.innerHTML = this.currentInfo.holeCards.toString();
+    if (cards.length === 0) return;
+
+    // var cardsBox = document.getElementsByClassName("card" + this.currentInfo.banker + "-box");
+
+    // for (let i = cards.length - 1; i >= 0; i--) {
+
+    //     const cardIndex = cards[i];
+        
+    //     var cardBox = Array.prototype.find.call(cardsBox, cardBox => cardBox.getAttribute("data-cardindex") == cardIndex)
+    //     console.log(cardBox)
+    //     // gameInfoDom.currentInfo.holeCards.appendChild(cardBox)
+
+    //     gameInfoDom.currentInfo.holeCards.innerHTML += cardBox
+    // }
+    console.log(gameInfoDom.currentInfo.holeCards)
+    // gameInfoDom.currentInfo.holeCards.innerHTML = this.currentInfo.holeCards.toString();
 
     this.setStage(STAGE.play)
 }
@@ -225,18 +259,18 @@ Game.prototype.setHole = function() {
 
             this.setHoleCards(player, selectCards);
 
-            console.log("\n----------------\n")
+            // console.log("\n----------------\n")
 
-            console.log("手牌:");
+            // console.log("手牌:");
 
-            this.players.forEach(player => {
-                console.log("玩家 " + player.seat)
-                for (const key in player.groupedCards) {
-                    if (player.groupedCards.hasOwnProperty(key)) {
-                        console.log(key + " : ", player.groupedCards[key].toString())
-                    }
-                }
-            })
+            // this.players.forEach(player => {
+            //     console.log("玩家 " + player.seat)
+            //     for (const key in player.groupedCards) {
+            //         if (player.groupedCards.hasOwnProperty(key)) {
+            //             console.log(key + " : ", player.groupedCards[key].toString())
+            //         }
+            //     }
+            // })
 
             document.getElementById("message").innerHTML = "";
 
@@ -244,7 +278,8 @@ Game.prototype.setHole = function() {
 
                 var cardBox = Array.prototype.find.call(cardsBox, cardBox => cardBox.getAttribute("data-cardindex") == cardIndex)
                 
-                cardBox.remove();
+                // cardBox.remove();
+                gameInfoDom.currentInfo.holeCards.appendChild(cardBox)
             })
 
             player.selectCards = [];
@@ -256,28 +291,26 @@ Game.prototype.setHole = function() {
     }
 }
 
-Game.prototype.play = function (cards) {
-
-    console.log('play');
+Game.prototype.play = function () {
 
     console.log("\n----------------\n")
+    console.log('play');
 
-    console.log("手牌:");
+    // console.log("手牌:");
 
-    this.players.forEach(player => {
-        console.log("玩家 " + player.seat)
-        console.log("cards", player.cards)
-        for (const key in player.groupedCards) {
-            if (player.groupedCards.hasOwnProperty(key)) {
-                console.log(key + " : ", player.groupedCards[key].toString())
-            }
-        }
-    })
+    // this.players.forEach(player => {
+    //     console.log("玩家 " + player.seat)
+    //     console.log("cards", player.cards)
+    //     for (const key in player.groupedCards) {
+    //         if (player.groupedCards.hasOwnProperty(key)) {
+    //             console.log(key + " : ", player.groupedCards[key].toString())
+    //         }
+    //     }
+    // })
 
-
-    console.log('本轮信息', this.currentState)
+    // console.log('本轮信息', this.currentState)
     console.log('本轮出牌者: 玩家', this.currentState.player)
-    // return;
+
 
     if(this.currentState.cards.length === 4) {
         //...
@@ -382,7 +415,7 @@ Game.prototype.play = function (cards) {
             setTimeout(() => {
 
                 this.play();
-            }, 3000);
+            }, config.playTimeout);
         });
     } else {
         this.players[this.currentState.player].selectRandomCards(this.currentState);
@@ -436,7 +469,7 @@ Game.prototype.play = function (cards) {
         setTimeout(() => {
 
             this.play();
-        }, 3000);
+        }, config.playTimeout);
     }
 
 
@@ -444,9 +477,15 @@ Game.prototype.play = function (cards) {
 
 }
 
-Game.prototype.end = function (cards) {
+Game.prototype.end = function () {
 
-    console.log('end')
+    console.log('end');
+
+
+    // this.globalInfo;
+    // this.currentInfo;
+
+    this.start();
 }
 
 
@@ -490,17 +529,25 @@ Game.prototype.showPlayPanel = function (callback) {
 
 
 //每发一张牌就应该加入dom中显示出来，以便亮主、抢庄。此处先不考虑，默认玩家为庄家。
-Game.prototype.addCardToDom = function () {
+Game.prototype.addCardToDom = function (seat) {
 
     this.players.forEach(player => {
 
+        if(seat !== undefined && player.seat !== seat) return;
         var palyerCardBox = document.getElementById("player" + player.seat + "-card");
+        // palyerCardBox.innerHTML = "";
 
+        while (palyerCardBox.firstChild) {
+            palyerCardBox.removeChild(palyerCardBox.firstChild);
+        }
+      
         var suits = ['master', 'hearts', 'spades', 'diamonds', 'clubs'];
 
         suits.forEach(suit => {
 
             const element = player.groupedCards[suit];
+
+            if(element.length === 0) return;
                 
             for (let i = element.length - 1; i >= 0; i--) {
                 const cardIndex = element[i];

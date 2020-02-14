@@ -46,7 +46,7 @@ Player.prototype.playCard = function() {
         this.groupedCards[pokers[cardIndex].group].splice(this.groupedCards[pokers[cardIndex].group].indexOf(cardIndex), 1)
 
         var cardBox = Array.prototype.find.call(cardsBox, cardBox => cardBox.getAttribute("data-cardindex") == cardIndex)
-        console.log(cardIndex, cardBox)
+
         palyCardBox.appendChild(cardBox)
       
     }
@@ -59,9 +59,14 @@ Player.prototype.setHoleCards = function(cards) {
         return cards.indexOf(cardIndex) < 0
     })
 
+
+    var cardsBox = document.getElementsByClassName("card" + this.seat + "-box");
+
+
     cards.forEach(cardIndex => {
 
         this.groupedCards[pokers[cardIndex].group].splice(this.groupedCards[pokers[cardIndex].group].indexOf(cardIndex), 1)
+    
     })
 }
 
@@ -244,6 +249,14 @@ Player.prototype.selectRandomCards = function(currentState, levelPoint) {
 }
 
 Player.prototype.divideCards = function(master) {
+
+    this.groupedCards = {
+        master: [],
+        hearts: [],
+        diamonds: [],
+        spades: [],
+        clubs: []
+    }
 
     this.cards.forEach(cardIndex => {
         

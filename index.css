@@ -1,4 +1,7 @@
-
+html, body {
+    margin: 0;
+    padding: 0;
+}
 
 .float-left {
     float: left;
@@ -14,12 +17,22 @@
     width: 800px;
     height: 630px;
     border: 1px solid #000;
+    background: url(img/bg3.jpg) no-repeat;
+    background-size: 100% 100%;
 }
 
 #player1, #player2, #player3 {
-    width: 80px;
+    width: 70px;
     height: 50px;
-    border: 1px solid #000;
+    color: #ffeb3b;
+}
+
+#player3 {
+    margin-left: 12px;
+}
+
+#player1 img, #player2 img, #player3 img {
+    width: 50px;
 }
 
 #player2, #playCard2, #playCard0, #playCardPanel {
@@ -86,4 +99,8 @@
 
 #gameInfo {
     float: left;
+}
+
+#holeCards {
+    margin-top: 20px;
 }

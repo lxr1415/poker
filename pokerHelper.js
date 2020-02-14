@@ -443,7 +443,7 @@ window.pokerHelper = {};
             
         } else {
     
-            return isMaster2 || pokers[cardIndexs1[0]].value < pokers[cardIndexs2[0]].value
+            return isMaster2 || pokers[cardIndexs1[0]].suit === pokers[cardIndexs2[0]].suit && pokers[cardIndexs1[0]].value < pokers[cardIndexs2[0]].value
             
         }
     }
