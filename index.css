@@ -1,6 +1,7 @@
 html, body {
     margin: 0;
     padding: 0;
+    overflow: hidden;
 }
 
 .float-left {
@@ -11,15 +12,40 @@ html, body {
     float: right;
 }
 
+.clearfloat {
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
 
 #game-box {
-    float: left;
-    width: 800px;
-    height: 630px;
-    border: 1px solid #000;
+    /* 注意,旋转方向后的box的宽高方向依然保持旋转前的宽高 ，所以旋转后的宽高和实际的宽高显示有区别*/
+    width: 100vh;
+    height: 100vw;
+    position: absolute;
+    top: 50%;
+    left: 50%;
     background: url(img/bg3.jpg) no-repeat;
     background-size: 100% 100%;
+    -webkit-transform-origin: center center;
+    transform-origin: center center;
+    -webkit-transform: translate(-50%, -50%) rotate(90deg);
+    transform: translate(-50%, -50%) rotate(90deg);
+    -webkit-touch-callout: none;
 }
+
+/* orientation:landscape代表宽的长度大于高的长度 */
+@media (orientation:landscape) {
+    #game-box {
+        width: 100vw;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        -webkit-transform: rotate(0);
+        transform: rotate(0);
+    }
+}
+
 
 #player1, #player2, #player3 {
     width: 70px;
@@ -45,17 +71,21 @@ html, body {
 }
 
 #player23-box {
+    position: absolute;
+    top: calc(50vh - 50px);
     width: 100%;
-    height: 200px;
-    margin-bottom: 20px;
+    margin-bottom: 90px;
 }
 
 #player3-box, #player1-box {
     width: 40%;
 }
 
-#playCard0, #playCard1, #playCard2, #playCard3 {
+#playCard0, #playCard1, #playCard3 {
     height: 50px;
+}
+#playCard2 {
+    height: calc(30vh - 50px);
 }
 
 #playCardPanel {
@@ -69,6 +99,16 @@ html, body {
     position: relative;
 }
 
+#player0-card {
+    margin-bottom: 10px;
+}
+
+#player0-box {
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+}
+
 #player1-card {
     clear: both;
     text-align: right;
@@ -78,6 +118,10 @@ html, body {
 
 #player2-card, #player0-card {
     text-align: center;
+}
+
+#player2-card, #player3-card, #player1-card {
+    display: none;
 }
 
 .card-box {
@@ -90,17 +134,72 @@ html, body {
 .card-box img {
     position: absolute;
     top: 0;
+    left: -9px;
 }
 
 #message{
     color: red;
 }
 
+#playCard {
+    display: inline-block;
+    width: 40px;
+    height: 22px;
+    line-height: 22px;
+    text-align: center;
+    color: #8c96a0;
+    text-shadow: 1px 1px 1px #fff;
+    border: 1px solid #dce1e6;
+    box-shadow: 0 1px 2px #fff inset, 0 -1px 0 #a8abae inset;
+    background: -webkit-linear-gradient(top,#f2f3f7,#e4e8ec);
+    border-radius: 5px;
+    font-weight: bold;
+}
+
 
 #gameInfo {
     float: left;
+    display: none;
 }
 
 #holeCards {
     margin-top: 20px;
+}
+
+
+#highLightMaster {
+    width: 256px;
+    height: 30px;
+    background: #e8e8e8;
+    border-radius: 10px;
+    box-shadow: 0 0 2px #EEE;
+    text-align: center;
+    margin: 10px auto;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.suit {
+    position: relative;
+    float: left;
+    width: 50px;
+    height: 30px;
+    text-align: center;
+    font-size: 28px;
+    line-height: 30px;
+    color:#666;
+    border-right: 1px solid #999;
+}
+
+.suit.clubs {
+    border-right: none;
+}
+
+.suit .suitNum {
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    font-size: 10px;
+    color: #333;
+    line-height: 10px;
 }

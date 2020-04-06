@@ -82,9 +82,14 @@ Game.prototype.init = function () {
     this.currentInfo.score = 0;
     this.currentInfo.holeCards = [];
 
-    pokerHelper.setPokersValue(this.currentInfo.level, this.currentInfo.master)
+    pokerHelper.setPokersValue(this.currentInfo.level, this.currentInfo.master);
 
-    this.run();
+    hightLightMasterPanel.addToDom(playCardDom[0]);
+
+    setTimeout(() => {
+        
+        this.run();
+    }, 1000);
 }
 
 
@@ -107,7 +112,8 @@ Game.prototype.stuffle = function () {
     console.log('洗牌', this.cards)
 }
 
-Game.prototype.deal = function (callback) {
+Game.prototype.deal = function () {
+
 
 
     this.dealOneCard(0)
@@ -123,16 +129,49 @@ Game.prototype.dealOneCard = function (i) {
         this.players[i % 4].addCard(card)
         this.players[i % 4].divideCards(this.currentInfo.master);
         this.addCardToDom(i % 4);
+
+        
+        if(i % 4 === 0) {
+
+            if(pokers[this.cards[i]].value < 27){
+
+                // 统计各类牌牌数
+                hightLightMasterPanel.addNum(pokers[this.cards[i]].suit)
+            }
+
+            // 拿到级牌时，亮主面板高亮此花色
+            if(this.currentInfo.level === pokers[this.cards[i]].defaultValue) {
+
+                hightLightMasterPanel.colour(pokers[this.cards[i]].suit);
+            }
+            
+            // 拿到一对王时，亮主面板高亮NT
+            if(pokers[this.cards[i]].value === 31 || pokers[this.cards[i]].value === 32){
+
+                var index = this.players[i % 4].groupedCards.master.findIndex(item => pokers[item].value === pokers[this.cards[i]].value);
+                if(index >= 0) {
+                    hightLightMasterPanel.colour("nt");
+                }
+            }
+        }
+
     } else {
+
+        // 发完基础牌， 清除亮主面板
+        hightLightMasterPanel.remove();
+
         if(this.currentInfo.banker === -1) {
             // this.setBanker(Math.floor( 4 * Math.random()))
+            console.log("自动设庄")
             this.setBanker(config.defaultBanker)
         }
         if(this.currentInfo.master === null) {
+
+            console.log("自动设主")
             this.setMasterCard(config.defaultMaster)
         }
 
-        this.players[this.currentInfo.banker].addCard(card)
+        this.players[this.currentInfo.banker].addCard(card);
     }
 
     if(i === config.cardNum - 1) {
@@ -158,6 +197,8 @@ Game.prototype.dealOneCard = function (i) {
         this.setStage(STAGE.setHole);
         return ;
     }
+
+
     i++;
 
     setTimeout(() => {
@@ -176,6 +217,8 @@ Game.prototype.setBanker = function (playerId) {
 
 
 Game.prototype.setMasterCard = function (master) {
+
+    if(this.currentInfo.master) return;// 暂时不允许换主
 
     this.currentInfo.master = master; 
     
@@ -259,19 +302,6 @@ Game.prototype.setHole = function() {
 
             this.setHoleCards(player, selectCards);
 
-            // console.log("\n----------------\n")
-
-            // console.log("手牌:");
-
-            // this.players.forEach(player => {
-            //     console.log("玩家 " + player.seat)
-            //     for (const key in player.groupedCards) {
-            //         if (player.groupedCards.hasOwnProperty(key)) {
-            //             console.log(key + " : ", player.groupedCards[key].toString())
-            //         }
-            //     }
-            // })
-
             document.getElementById("message").innerHTML = "";
 
             player.selectCards.forEach(cardIndex => {
@@ -296,19 +326,6 @@ Game.prototype.play = function () {
     console.log("\n----------------\n")
     console.log('play');
 
-    // console.log("手牌:");
-
-    // this.players.forEach(player => {
-    //     console.log("玩家 " + player.seat)
-    //     console.log("cards", player.cards)
-    //     for (const key in player.groupedCards) {
-    //         if (player.groupedCards.hasOwnProperty(key)) {
-    //             console.log(key + " : ", player.groupedCards[key].toString())
-    //         }
-    //     }
-    // })
-
-    // console.log('本轮信息', this.currentState)
     console.log('本轮出牌者: 玩家', this.currentState.player)
 
 
@@ -316,19 +333,6 @@ Game.prototype.play = function () {
         //...
         //本轮结算
         // next
-        console.log("\n----------------\n")
-
-        console.log("手牌:");
-
-        this.players.forEach(player => {
-            console.log("玩家 " + player.seat)
-            console.log("cards", player.cards)
-            for (const key in player.groupedCards) {
-                if (player.groupedCards.hasOwnProperty(key)) {
-                    console.log(key + " : ", player.groupedCards[key].toString())
-                }
-            }
-        })
 
         if(this.players[0].cards.length === 0) {
 

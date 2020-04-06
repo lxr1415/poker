@@ -101,7 +101,7 @@ Player.prototype.selectRandomCards = function(currentState, levelPoint) {
             if(currentState.cardType === 0) {
 
                 var randomCardIndex = this.groupedCards[currentState.group][Math.floor(Math.random() * len)]
-                console.log('玩家 ', player.seat, ' 随机选择牌: ', pokers[randomCardIndex])
+                console.log('玩家 ', this.seat, ' 随机选择牌: ', pokers[randomCardIndex])
                 this.selectCards.push(randomCardIndex)
             } else if(currentState.cardType === 1)  {
 

@@ -22,6 +22,16 @@ var gameInfoDom = {
     }
 }
 
+// 出牌框
+var playCardDom = [
+    document.getElementById("playCard0"),
+    document.getElementById("playCard1"),
+    document.getElementById("playCard2"),
+    document.getElementById("playCard3")
+]
+
+//出牌按钮
+var playCardButton = document.getElementById("playCard");
 
 var player = new Player(0);
 var robot1 = new Player(1);
@@ -35,15 +45,10 @@ var game = new Game([player, robot1, robot2, robot3], {});
 game.start();
 
 
-
-
-var playCardButton = document.getElementById("playCard");
-
+//清空出牌框
 function clearPlayCard() {
 
-    var playCardBoxs = document.getElementsByClassName("playCard");
-
-    for (var i = 0; i < playCardBoxs.length; i++) {
-        playCardBoxs[i].innerHTML = ""
+    for (var i = 0; i < playCardDom.length; i++) {
+        playCardDom[i].innerHTML = ""
     }
 }

@@ -2,9 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <meta name="full-screen" content="yes">       <!-- 全屏显示 -->
+    <meta name="x5-fullscreen" content="true">          <!--QQ强制全屏 -->
+    <meta name="x5-page-mode" content="app">  <!--  QQ应用模式 -->
+    
+    <!--  WebApp全屏模式 -->
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no,minimal-ui">   
+    
+    <!-- Android 禁止屏幕旋转 -->
+    <meta name="screen-orientation" content="portrait"> 
+    <title>升级-单机版</title>
 
     <link rel="stylesheet" href="./index.css">
 </head>
@@ -40,15 +47,21 @@
             </div>
 
             <div id="player1-card"></div>
+            <div class="clearfloat"></div>
         </div>
 
-        <div id="playCard0" class="playCard"></div>
-        <div id="playCardPanel">
-            <button id="playCard">亮主</button>
-            <span id="message"></span>
-        </div>
-        <div id="player0-card">
+        <div id="player0-box">
+            
+            <div id="playCard0" class="playCard">
 
+            </div>
+            <div id="playCardPanel">
+                <div id="playCard">亮主</div>
+                <span id="message"></span>
+            </div>
+            <div id="player0-card">
+
+            </div>
         </div>
 
     </div>
@@ -82,11 +95,14 @@
 
 
     <script src="./source/poker.js"></script>
+
+    
+    <script src="./components/highLightMasterPanel.js"></script>
+
     <script src="./game.js"></script>
     <script src="./player.js"></script>
     <script src="./pokerHelper.js"></script>
     <script src="./index.js"></script>
 </body>
 </html>
-<!-- 别忘了提交代码 -->
 
