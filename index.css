@@ -77,6 +77,16 @@ html, body {
     margin-bottom: 90px;
 }
 
+/* orientation:landscape代表宽的长度大于高的长度 */
+@media (orientation:landscape) {
+    #player23-box {
+        position: absolute;
+        top: calc(50vw - 50px);
+        width: 100%;
+        margin-bottom: 90px;
+    }
+}
+
 #player3-box, #player1-box {
     width: 40%;
 }
@@ -86,6 +96,12 @@ html, body {
 }
 #playCard2 {
     height: calc(30vh - 50px);
+}
+/* orientation:landscape代表宽的长度大于高的长度 */
+@media (orientation:landscape) {
+    #playCard2 {
+        height: calc(30vw - 50px);
+    }
 }
 
 #playCardPanel {

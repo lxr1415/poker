@@ -55,7 +55,7 @@ var hightLightMasterPanel =
         },
         colour: function(suit) {
 
-            if(this.state[suit].colored) return;
+            if(this.state[suit].colored || !this.used) return;
 
             var suitDom = document.getElementsByClassName(suit)[0];
 
@@ -63,12 +63,14 @@ var hightLightMasterPanel =
 
             suitDom.onclick = function () {
 
-                game.setMasterCard(suit)
+                game.setMasterCard(suit, game.mainSeat)
             }
 
             this.state[suit].colored = true;
         },
         addNum: function(suit) {
+
+            if(!this.used) return;
 
             var suitDom = document.getElementsByClassName(suit)[0];
 

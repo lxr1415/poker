@@ -54,14 +54,6 @@ Player.prototype.playCard = function() {
       
     }
 
-    ws.send(JSON.stringify({
-        type: STATE.PLAY,
-        msg: {
-            seat: this.seat,
-            selectCards: this.selectCards
-        }
-    }))
-
     this.selectCards = [];
 }
 
