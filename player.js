@@ -1,4 +1,4 @@
-function Player(seat) {
+function Player(seat, mainSeat) {
 
     this.seat = seat;
     this.group = seat % 2;
@@ -14,10 +14,16 @@ function Player(seat) {
     }
     this.selectCards = [];
 
+    this.palyCardBox = playCardDom[(4 + seat - mainSeat) % 4];
+    this.cardsBox = cardsDom[(4 + seat - mainSeat) % 4];
 }
 
 Player.prototype.init = function() {
     this.selectCards = [];
+}
+
+Player.prototype.onReady = function () {
+    this.palyCardBox.innerHTML = "就绪"
 }
 
 Player.prototype.addCard = function(card) {
@@ -35,33 +41,35 @@ Player.prototype.playCard = function() {
 
     this.cards = this.cards.filter((cardIndex) => {
         return this.selectCards.indexOf(cardIndex) < 0
-    })
-
-    var palyCardBox = document.getElementById("playCard" + this.seat);
-    var cardsBox = document.getElementsByClassName("card" + this.seat + "-box");
+    });
 
     for (let i = this.selectCards.length - 1; i >= 0 ; i--) {
 
         const cardIndex = this.selectCards[i];
         this.groupedCards[pokers[cardIndex].group].splice(this.groupedCards[pokers[cardIndex].group].indexOf(cardIndex), 1)
 
-        var cardBox = Array.prototype.find.call(cardsBox, cardBox => cardBox.getAttribute("data-cardindex") == cardIndex)
+        var cardBox = Array.prototype.find.call(this.cardsBox, cardBox => cardBox.getAttribute("data-cardindex") == cardIndex)
 
-        palyCardBox.appendChild(cardBox)
+        this.palyCardBox.appendChild(cardBox)
       
     }
+
+    ws.send(JSON.stringify({
+        type: STATE.PLAY,
+        msg: {
+            seat: this.seat,
+            selectCards: this.selectCards
+        }
+    }))
 
     this.selectCards = [];
 }
 
 Player.prototype.setHoleCards = function(cards) {
+
     this.cards = this.cards.filter(function(cardIndex) {
         return cards.indexOf(cardIndex) < 0
     })
-
-
-    var cardsBox = document.getElementsByClassName("card" + this.seat + "-box");
-
 
     cards.forEach(cardIndex => {
 

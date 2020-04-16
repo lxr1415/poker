@@ -11,7 +11,7 @@
     
     <!-- Android 禁止屏幕旋转 -->
     <meta name="screen-orientation" content="portrait"> 
-    <title>升级-单机版</title>
+    <title>升级-联机版</title>
 
     <link rel="stylesheet" href="./index.css">
 </head>
@@ -25,7 +25,7 @@
         </div>
         <div id="player2-card"></div>
 
-        <div id="playCard2" class="playCard"></div>
+        <div id="playCard2" class="playCard">准备</div>
 
         <div id="player23-box">
 
@@ -36,14 +36,14 @@
                     <img src="img/pic.jpg" alt="">
                     3
                 </div>
-                <div id="playCard3" class="playCard float-right"></div>
+                <div id="playCard3" class="playCard float-right">准备</div>
             </div>
             <div id="player1-box" class="float-right">
                 <div id="player1" class="float-right">
                     <img src="img/pic1.jpeg" alt="">
                     1
                 </div>
-                <div id="playCard1" class="playCard float-left"></div>
+                <div id="playCard1" class="playCard float-left">准备</div>
             </div>
 
             <div id="player1-card"></div>
@@ -56,7 +56,8 @@
 
             </div>
             <div id="playCardPanel">
-                <div id="playCard">亮主</div>
+                <!-- class: ready,hightLightMaster,setHoles,playCard -->
+                <div id="playCard" class="ready">准备</div> 
                 <span id="message"></span>
             </div>
             <div id="player0-card">
@@ -99,6 +100,7 @@
     
     <script src="./components/highLightMasterPanel.js"></script>
 
+    <script src="./config.js"></script>
     <script src="./game.js"></script>
     <script src="./player.js"></script>
     <script src="./pokerHelper.js"></script>

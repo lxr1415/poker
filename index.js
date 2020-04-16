@@ -1,48 +1,89 @@
 
-
-var gameInfoDom = {
-    globalInfo: {
-        allLevel: document.getElementById("allLevel"),
-    },
-    currentInfo: {
-        levelPoint: document.getElementById("levelPoint"),
-        banker: document.getElementById("banker"),
-        master: document.getElementById("master"),
-        score: document.getElementById("score"),
-        holeCards: document.getElementById("holeCards"),
-    },
-    currentState: {
-        player: document.getElementById("player"),
-        startPlayer: document.getElementById("startPlayer"),
-        cards: document.getElementById("cards"),
-        group: document.getElementById("group"),
-        cardType: document.getElementById("cardType"),
-        score: document.getElementById("score2"),
-        bigCardPlayer: document.getElementById("bigCardPlayer"),
-    }
+var STATE = {
+    CONNECTION: 0,
+    READY: 1,
+    START: 2,
+    PLAY: 3,
+    DISCONNECT: 4,
 }
 
-// 出牌框
-var playCardDom = [
-    document.getElementById("playCard0"),
-    document.getElementById("playCard1"),
-    document.getElementById("playCard2"),
-    document.getElementById("playCard3")
-]
-
-//出牌按钮
-var playCardButton = document.getElementById("playCard");
-
-var player = new Player(0);
-var robot1 = new Player(1);
-var robot2 = new Player(2);
-var robot3 = new Player(3);
 
 var pokers = pokerHelper.createPoker();
 
-var game = new Game([player, robot1, robot2, robot3], {});
+var game = new Game({});
 
-game.start();
+
+let ws = new WebSocket('ws://119.23.139.60:3000');
+
+ws.onmessage = function (msg) {
+
+    let msg = JSON.parse(msg);
+
+    console.log("收到来自ip:", ip, " 的信息:", msg);
+
+    let data = msg.data;
+
+    if (data.type === undefined || data.type === null) return;
+
+    switch (data.type) {
+
+        case STATE.CONNECTION:
+
+            let {isSelf, seat, clients} = data.msg;
+
+            if(isSelf) {
+
+                game.setMainSeat(seat);
+                clients.forEach(client => client && game.addPlayer(client.seat));
+            } else {
+                game.addPlayer(seat);
+            }
+
+            console.log(`%c 入座`, 'color: #FFF, background: #000', ` ip为 ${clients[seat].ip} 入座seat ${seat}`)
+
+            break;
+
+        case STATE.READY:
+
+            let { isSelf, seat, clients } = data.msg;
+
+            game.getPlayer(seat).onReady();
+
+            console.log(`%c 准备`, 'color: #FFF, background: #AA0', ` 座位seat ${seat} 准备就绪`)
+
+            break;
+
+        case STATE.START:
+
+            // let clients = data.msg.clients;
+            let cards = data.msg.cards;
+
+            console.log(`%c 开始`, 'color: #FFF, background: #0A0', ` 所有玩家准备就绪`);
+
+            game.start(cards);
+            break;
+
+        case STATE.PLAY:
+
+            let { seat, selectCards } = data.msg;
+
+            console.log(`%c 出牌`, 'color: #FFF, background: #00A', ` 座位seat ${seat} 已出牌`, selectCards);
+
+            game.play(seat, selectCards)
+            break;
+
+        case STATE.DISCONNECT:
+
+            let { seat } = data.msg;
+
+            console.log(`%c 掉线`, 'color: #FFF, background: #F00', ` 座位seat ${seat} 已掉线`)
+
+            break;
+
+        default: break;
+    }
+}
+
 
 
 //清空出牌框
@@ -52,3 +93,15 @@ function clearPlayCard() {
         playCardDom[i].innerHTML = ""
     }
 }
+
+function ready() {
+
+    ws.send(JSON.stringify({
+        type: STATE.READY
+    }))
+
+    playCardButton.removeEventListener('click', ready, false);
+}
+
+
+playCardButton.addEventListener('click', ready, false);
