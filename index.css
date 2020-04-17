@@ -174,8 +174,9 @@ html, body {
 
 
 #gameInfo {
-    float: left;
-    display: none;
+    position: absolute;
+    left: 20px;
+    top: 20px;
 }
 
 #holeCards {

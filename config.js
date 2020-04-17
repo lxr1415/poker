@@ -9,17 +9,17 @@ var gameInfoDom = {
         banker: document.getElementById("banker"),
         master: document.getElementById("master"),
         score: document.getElementById("score"),
-        holeCards: document.getElementById("holeCards"),
+        // holeCards: document.getElementById("holeCards"),
     },
-    currentState: {
-        player: document.getElementById("player"),
-        startPlayer: document.getElementById("startPlayer"),
-        cards: document.getElementById("cards"),
-        group: document.getElementById("group"),
-        cardType: document.getElementById("cardType"),
-        score: document.getElementById("score2"),
-        bigCardPlayer: document.getElementById("bigCardPlayer"),
-    }
+    // currentState: {
+    //     player: document.getElementById("player"),
+    //     startPlayer: document.getElementById("startPlayer"),
+    //     cards: document.getElementById("cards"),
+    //     group: document.getElementById("group"),
+    //     cardType: document.getElementById("cardType"),
+    //     score: document.getElementById("score2"),
+    //     bigCardPlayer: document.getElementById("bigCardPlayer"),
+    // }
 }
 
 // 出牌框

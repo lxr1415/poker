@@ -244,43 +244,13 @@ Game.prototype.setHoleCards = function (player, cards) {
 Game.prototype.setHole = function () {
 
     //假设默认玩家为庄家
-    console.log('请扣底: ');
+    console.log('扣底: ');
 
     var playCardButton = document.getElementById("playCard");
     playCardButton.innerHTML = "扣底"
     playCardButton.style.display = "inline-block";
 
-    var player = this.players[this.currentInfo.banker];
-
-    var cardsBox = document.getElementsByClassName("card" + player.seat + "-box");
-
-    for (let i = cardsBox.length - 1; i >= 0; i--) {
-        const cardBox = cardsBox[i];
-
-        cardBox.onclick = function () {
-
-            var cardIndex = this.getAttribute("data-cardindex");
-
-            var childNodes = this.childNodes;
-
-            var img = childNodes[0];
-
-            if (img.tagName === "IMG") {
-
-
-                if (img.style.top === "-10px") {
-                    img.style.top = "0"
-
-                    player.selectCards.splice(player.selectCards.indexOf(cardIndex), 1);
-                } else {
-
-                    img.style.top = "-10px"
-                    player.selectCards.push(cardIndex);
-                }
-            }
-        }
-    }
-
+    var player = this.players[this.mainSeat];
 
     playCardButton.onclick = () => {
 
@@ -292,18 +262,10 @@ Game.prototype.setHole = function () {
 
             message.innerHTML = "";
 
-            player.selectCards.forEach(cardIndex => {
-
-                var cardBox = Array.prototype.find.call(cardsBox, cardBox => cardBox.getAttribute("data-cardindex") == cardIndex)
-
-                // cardBox.remove();
-                gameInfoDom.currentInfo.holeCards.appendChild(cardBox)
-            })
-
             player.selectCards = [];
 
         } else {
-            console.log("牌数必须为" + config.holeNum + "张")
+            console.warn("牌数必须为" + config.holeNum + "张")
             message.innerHTML = "牌数必须为" + config.holeNum + "张";
         }
     }
@@ -312,22 +274,24 @@ Game.prototype.setHole = function () {
 Game.prototype.play = function (seat, selectCards) {
 
     console.log("\n----------------\n")
-    console.log('play');
 
-    console.log('本轮出牌者: 玩家', this.currentState.player)
+    console.log('出牌玩家: ', seat)
 
-
+    // 出牌这不是本人时, 其他玩家出牌
     if (this.mainSeat !== seat) {
 
-
-        if (this.currentState.player === this.currentState.startPlayer) {
+        // 首出
+        if (seat === this.currentState.startPlayer) {
 
             clearPlayCard(); //清空牌桌上上一轮打的牌
             this.currentState.group = pokers[selectCards[0]].isMaster ? "master" : pokers[selectCards[0]].suit;
             this.currentState.cardType = pokerHelper.getCardType(selectCards, this.currentInfo.level);
-            this.currentState.bigCardPlayer = this.currentState.player;
-        } else {
+            this.currentState.bigCardPlayer = seat;
+        } 
+        // 跟牌
+        else {
 
+            // 判断是否比别人大
             var isBiger = pokerHelper.compare(
                 this.currentState.cards[(this.currentState.bigCardPlayer - this.currentState.startPlayer + 4) % 4],
                 selectCards,
@@ -337,27 +301,19 @@ Game.prototype.play = function (seat, selectCards) {
 
             if (isBiger) {
                 this.currentState.bigCardPlayer = this.currentState.player;
+
+                // 显示'大'字在出牌框右侧
             }
         }
 
-        this.players[this.currentState.player].playCard(selectCards);
+        this.players[seat].playCard(selectCards);
         this.currentState.cards.push(selectCards);
 
         this.currentState.score += pokerHelper.getScore(selectCards);
 
-        console.log(this.currentState.player, "出牌: ", selectCards)
+        console.log(seat, "出牌: ", selectCards)
 
-        this.currentState.player = (this.currentState.player + 1) % 4;
-
-
-        gameInfoDom.currentState.player.innerHTML = this.currentState.player;
-        gameInfoDom.currentState.startPlayer.innerHTML = this.currentState.startPlayer;
-        gameInfoDom.currentState.cards.innerHTML = this.currentState.cards.toString();
-        gameInfoDom.currentState.group.innerHTML = this.currentState.group;
-        gameInfoDom.currentState.cardType.innerHTML = this.currentState.cardType;
-        gameInfoDom.currentState.score.innerHTML = this.currentState.score;
-        gameInfoDom.currentState.bigCardPlayer.innerHTML = this.currentState.bigCardPlayer;
-
+        this.currentState.player = (seat + 1) % 4;
     }
 
 
@@ -387,15 +343,6 @@ Game.prototype.play = function (seat, selectCards) {
             score: 0, // 本轮中的分数
             bigCardPlayer: this.currentState.bigCardPlayer, //出牌中最大者
         }
-
-        gameInfoDom.currentState.player.innerHTML = this.currentState.player;
-        gameInfoDom.currentState.startPlayer.innerHTML = this.currentState.startPlayer;
-        gameInfoDom.currentState.cards.innerHTML = this.currentState.cards.toString();
-        gameInfoDom.currentState.group.innerHTML = this.currentState.group;
-        gameInfoDom.currentState.cardType.innerHTML = this.currentState.cardType;
-        gameInfoDom.currentState.score.innerHTML = this.currentState.score;
-        gameInfoDom.currentState.bigCardPlayer.innerHTML = this.currentState.bigCardPlayer;
-
 
         if(this.currentState.bigCardPlayer === this.mainSeat) {
             this.showPlayPanel();
@@ -444,12 +391,12 @@ Game.prototype.showPlayPanel = function (callback) {
         if (selectCards.length > 0 && pokerHelper.isValidCard(selectCards, player.groupedCards, this.currentState, this.currentInfo.level)) {
 
 
-            if (this.currentState.player === this.currentState.startPlayer) {
+            if (this.mainSeat === this.currentState.startPlayer) {
 
                 clearPlayCard(); //清空牌桌上上一轮打的牌
                 this.currentState.group = pokers[selectCards[0]].isMaster ? "master" : pokers[selectCards[0]].suit;
                 this.currentState.cardType = pokerHelper.getCardType(selectCards, this.currentInfo.level);
-                this.currentState.bigCardPlayer = 0;
+                this.currentState.bigCardPlayer = this.mainSeat;
             } else {
 
                 var isBiger = pokerHelper.compare(
@@ -460,7 +407,7 @@ Game.prototype.showPlayPanel = function (callback) {
                 )
 
                 if (isBiger) {
-                    this.currentState.bigCardPlayer = 0;
+                    this.currentState.bigCardPlayer = this.mainSeat;
                 }
             }
 
@@ -478,18 +425,9 @@ Game.prototype.showPlayPanel = function (callback) {
 
             this.currentState.score += pokerHelper.getScore(selectCards);
 
-            console.log(this.currentState.player, "出牌: ", selectCards)
+            console.log("我出牌: ", selectCards)
 
-            this.currentState.player = (this.currentState.player + 1) % 4;
-
-
-            gameInfoDom.currentState.player.innerHTML = this.currentState.player;
-            gameInfoDom.currentState.startPlayer.innerHTML = this.currentState.startPlayer;
-            gameInfoDom.currentState.cards.innerHTML = this.currentState.cards.toString();
-            gameInfoDom.currentState.group.innerHTML = this.currentState.group;
-            gameInfoDom.currentState.cardType.innerHTML = this.currentState.cardType;
-            gameInfoDom.currentState.score.innerHTML = this.currentState.score;
-            gameInfoDom.currentState.bigCardPlayer.innerHTML = this.currentState.bigCardPlayer;
+            this.currentState.player = (this.mainSeat + 1) % 4;
 
             flag = false;
 
@@ -522,19 +460,41 @@ Game.prototype.addCardToDom = function () {
 
     suits.forEach(suit => {
 
-        const element = player.groupedCards[suit];
+        var element = player.groupedCards[suit];
 
         if (element.length === 0) return;
 
         for (let i = element.length - 1; i >= 0; i--) {
-            const cardIndex = element[i];
-            var div = document.createElement("div");
-            div.style.display = "inline-block";
-            div.setAttribute("class", "card-box card0-box");
-            div.setAttribute("data-cardindex", cardIndex);
-            div.appendChild(pokers[cardIndex].image)
 
-            palyerCardBox.appendChild(div)
+            var cardIndex = element[i];
+            var cardBox = document.createElement("div");
+            cardBox.style.display = "inline-block";
+            cardBox.setAttribute("class", "card-box card0-box");
+            cardBox.setAttribute("data-cardindex", cardIndex);
+            cardBox.appendChild(pokers[cardIndex].image)
+
+            palyerCardBox.appendChild(cardBox);
+
+            cardBox.onclick = function () {
+
+                var childNodes = this.childNodes;
+
+                var img = childNodes[0];
+
+                if (img.tagName === "IMG") {
+
+
+                    if (img.style.top === "-10px") {
+                        img.style.top = "0"
+
+                        player.selectCards.splice(player.selectCards.indexOf(cardIndex), 1);
+                    } else {
+
+                        img.style.top = "-10px"
+                        player.selectCards.push(cardIndex);
+                    }
+                }
+            }
         }
     })
 }
