@@ -20,8 +20,8 @@
     <div id="game-box">
 
         <div id="player2">
-            <img src="img/pic2.jpg" alt="">
-            2
+            <img id="player2-avatar" alt="">
+            <span id="player2-name"></span>
         </div>
         <div id="player2-card"></div>
 
@@ -33,15 +33,15 @@
 
             <div id="player3-box" class="float-left">
                 <div id="player3"  class="float-left">
-                    <img src="img/pic.jpg" alt="">
-                    3
+                    <img id="player3-avatar" alt="">
+                    <span id="player3-name"></span>
                 </div>
                 <div id="playCard3" class="playCard float-right">准备</div>
             </div>
             <div id="player1-box" class="float-right">
                 <div id="player1" class="float-right">
-                    <img src="img/pic1.jpeg" alt="">
-                    1
+                    <img id="player1-avatar" alt="">
+                    <span id="player1-name"></span>
                 </div>
                 <div id="playCard1" class="playCard float-left">准备</div>
             </div>
@@ -51,7 +51,12 @@
         </div>
 
         <div id="player0-box">
-            
+
+            <div id="player0">
+                <img id="player0-avatar" alt="">
+                <span id="player0-name"></span>
+            </div>
+
             <div id="playCard0" class="playCard">
 
             </div>
@@ -65,33 +70,35 @@
             </div>
         </div>
 
-    </div>
 
-    <div id="gameInfo">
+        
 
-        <div id="globalInfo">
-            牌级：<span id="allLevel"></span><br><br>
+        <div id="gameInfo">
+
+            <div id="globalInfo">
+                牌级：<span id="allLevel"></span><br><br>
+            </div>
+
+            <div id="currentInfo">
+                级牌：<span id="levelPoint"></span><br>
+                庄家：<span id="banker"></span><br>
+                主：<span id="master"></span><br>
+                分数：<span id="score"></span><br>
+                <!-- 底牌：<div id="holeCards"></div><br><br> -->
+            </div>
+
+            <!-- <div id="currentState">
+                当前出牌人：<span id="player"></span><br>
+                首出者：<span id="startPlayer"></span><br>
+                已出牌：<span id="cards"></span><br>
+                首出牌种类：<span id="group"></span><br>
+                首出牌牌型：<span id="cardType"></span><br>
+                本轮累计分数：<span id="score2"></span><br>
+                出牌中最大者：<span id="bigCardPlayer"></span>
+            </div> -->
         </div>
 
-        <div id="currentInfo">
-            级牌：<span id="levelPoint"></span><br>
-            庄家：<span id="banker"></span><br>
-            主：<span id="master"></span><br>
-            分数：<span id="score"></span><br>
-            <!-- 底牌：<div id="holeCards"></div><br><br> -->
-        </div>
-
-        <!-- <div id="currentState">
-            当前出牌人：<span id="player"></span><br>
-            首出者：<span id="startPlayer"></span><br>
-            已出牌：<span id="cards"></span><br>
-            首出牌种类：<span id="group"></span><br>
-            首出牌牌型：<span id="cardType"></span><br>
-            本轮累计分数：<span id="score2"></span><br>
-            出牌中最大者：<span id="bigCardPlayer"></span>
-        </div> -->
     </div>
-
 
 
 

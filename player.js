@@ -1,6 +1,7 @@
 function Player(seat, mainSeat) {
 
     this.seat = seat;
+    this.mainSeat = mainSeat;
     this.group = seat % 2;
     this.isBanker = false;
     this.cards = [];
@@ -14,12 +15,21 @@ function Player(seat, mainSeat) {
     }
     this.selectCards = [];
 
-    this.palyCardBox = playCardDom[(4 + seat - mainSeat) % 4];
-    this.cardsBox = cardsDom[(4 + seat - mainSeat) % 4];
+    this.init();
 }
 
 Player.prototype.init = function() {
+
     this.selectCards = [];
+
+    var id = (4 + this.seat - this.mainSeat) % 4;
+    this.palyCardBox = playCardDom[id];
+    this.playerImg = playerImgs[id];
+    this.playerName = playerNames[id];
+    this.cardsBox = cardsDom[id];
+
+    this.playerImg.setAttribute('src', 'img/pic' + this.seat + '.jpg' );
+    this.playerName.innerHTML = this.seat;
 }
 
 Player.prototype.onReady = function () {
@@ -37,7 +47,9 @@ Player.prototype.addCard = function(card) {
     }
 }
 
-Player.prototype.playCard = function() {
+Player.prototype.playCard = function(selectCards) {
+
+    this.selectCards = selectCards || this.selectCards;
 
     this.cards = this.cards.filter((cardIndex) => {
         return this.selectCards.indexOf(cardIndex) < 0
@@ -48,10 +60,20 @@ Player.prototype.playCard = function() {
         const cardIndex = this.selectCards[i];
         this.groupedCards[pokers[cardIndex].group].splice(this.groupedCards[pokers[cardIndex].group].indexOf(cardIndex), 1)
 
-        var cardBox = Array.prototype.find.call(this.cardsBox, cardBox => cardBox.getAttribute("data-cardindex") == cardIndex)
+        var cardBox;
+        if(this.seat === this.mainSeat) {
+
+            cardBox = Array.prototype.find.call(this.cardsBox, cardBox => cardBox.getAttribute("data-cardindex") == cardIndex);
+        } else {
+            
+            var cardBox = document.createElement("div");
+            cardBox.style.display = "inline-block";
+            cardBox.setAttribute("class", "card-box card0-box");
+            cardBox.setAttribute("data-cardindex", cardIndex);
+            cardBox.appendChild(pokers[cardIndex].image)
+        }
 
         this.palyCardBox.appendChild(cardBox)
-      
     }
 
     this.selectCards = [];
@@ -84,6 +106,7 @@ Player.prototype.clearCard = function(cards) {
     this.isBanker = false;
 }
 
+// 超时没有出牌，则选取随机牌出。
 Player.prototype.selectRandomCards = function(currentState, levelPoint) {
     
     if(this.seat === currentState.startPlayer) {
@@ -260,7 +283,8 @@ Player.prototype.divideCards = function(master) {
 
     this.cards.forEach(cardIndex => {
         
-        if(pokers[cardIndex].value >= 15 || pokers[cardIndex].suit === master) {
+
+        if(pokers[cardIndex].value >= 15 || master && pokers[cardIndex].suit === master) {
 
             this.groupedCards.master.push(cardIndex);
             pokers[cardIndex].isMaster = true;

@@ -57,6 +57,7 @@ ws.onmessage = function (msg) {
 
             console.log(`%c 开始`, 'color: #FFF, background: #0A0', ` 所有玩家准备就绪`);
 
+            clearPlayCard();
             game.start(cards);
             break;
 
@@ -78,14 +79,13 @@ ws.onmessage = function (msg) {
             let { selectCards } = data.msg;
 
             console.log(`%c 出牌`, 'color: #FFF, background: #00A', ` 座位seat ${seat} 已出牌`, selectCards);
-
-            game.play(seat, selectCards)
+            
+            game.play(seat, selectCards);
             break;
 
         case STATE.DISCONNECT:
 
             console.log(`%c 掉线`, 'color: #FFF, background: #F00', ` 座位seat ${seat} 已掉线`)
-
             break;
 
         default: break;
@@ -108,6 +108,7 @@ function ready() {
         type: STATE.READY
     }))
 
+    playCardButton.style.opacity = 0;
     playCardButton.removeEventListener('click', ready, false);
 }
 

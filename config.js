@@ -22,12 +22,36 @@ var gameInfoDom = {
     // }
 }
 
+
+// var playerDom = [
+//     {
+//         playCardDom: document.getElementById("playCard0"),
+//         playerImg: document.getElementById("player0-avatar"),
+//         playerName: document.getElementById("player0-name"),
+//         cardsDom: document.getElementsByClassName("card0-box")
+//     },
+//     ...
+// ]
+
 // 出牌框
 var playCardDom = [
     document.getElementById("playCard0"),
     document.getElementById("playCard1"),
     document.getElementById("playCard2"),
     document.getElementById("playCard3")
+];
+
+var playerImgs = [
+    document.getElementById("player0-avatar"),
+    document.getElementById("player1-avatar"),
+    document.getElementById("player2-avatar"),
+    document.getElementById("player3-avatar")
+];
+var playerNames = [
+    document.getElementById("player0-name"),
+    document.getElementById("player1-name"),
+    document.getElementById("player2-name"),
+    document.getElementById("player3-name")
 ];
 
 var cardsDom = [

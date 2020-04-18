@@ -57,8 +57,14 @@ html, body {
     margin-left: 12px;
 }
 
-#player1 img, #player2 img, #player3 img {
+#player0 img, #player1 img, #player2 img, #player3 img {
     width: 50px;
+}
+
+#player0 {
+    position: absolute;
+    left: 12px;
+    top: 20px;
 }
 
 #player2, #playCard2, #playCard0, #playCardPanel {
@@ -72,7 +78,7 @@ html, body {
 
 #player23-box {
     position: absolute;
-    top: calc(50vh - 50px);
+    top: calc(50vw - 50px);
     width: 100%;
     margin-bottom: 90px;
 }
@@ -81,7 +87,7 @@ html, body {
 @media (orientation:landscape) {
     #player23-box {
         position: absolute;
-        top: calc(50vw - 50px);
+        top: calc(50vh - 50px);
         width: 100%;
         margin-bottom: 90px;
     }
