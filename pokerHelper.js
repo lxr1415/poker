@@ -281,16 +281,14 @@ window.pokerHelper = {};
      * @param {object} currentState 当前轮次信息
      */
     function isValidCard( selectCards, groupedCards, currentState, levelPoint ) {
-    
+
+        
         //首出
         //不符合牌型
         if(currentState.startPlayer === currentState.player) {
             
             return getCardType(selectCards, levelPoint) >= 0 
         }
-
-        //假设跟出是符合规则的
-        // return true;
 
         //跟出
 
@@ -303,13 +301,14 @@ window.pokerHelper = {};
 
         var group = currentState.group; //首出牌种类
 
-        //手中无首出牌种类的牌， 可出任意牌
-        if(groupedCards[group].length === 0) {
-            return true
-        }
+        // 前提： 手中无首出牌种类的牌
 
-        
-        // 手牌中的首出牌种类牌数小于等于需出牌数，但还存在此类牌，需保证全部打出，垫牌。
+        // 判断： 可出任意牌
+        if(groupedCards[group].length === 0) return true;
+
+        // 前提： 手中有首出牌种类的牌 + 手牌中的首出牌种类牌数小于等于需出牌数
+
+        // 判断： 如果还存在此类牌，需保证全部打出，垫牌。
         if(groupedCards[group].length > 0 && groupedCards[group].length <= currentState.cards[0].length) {
 
             var num = 0;
@@ -323,7 +322,9 @@ window.pokerHelper = {};
             return num === groupedCards[group].length;
         }
 
-        // 手牌中的首出牌种类牌数大于需出牌数, 需要保证花色相同。
+        // 前提： 手中有首出牌种类的牌 + 手牌中的首出牌种类牌数大于等于需出牌数
+
+        // 判断： 需要保证花色相同。
         if(groupedCards[group].length > currentState.cards[0].length){
 
             var num = 0;
@@ -334,14 +335,14 @@ window.pokerHelper = {};
             }
         }
 
+        // 前提： 手中有首出牌种类的牌 + 手牌中的首出牌种类牌数大于等于需出牌数 + 花色相同
 
-        // 牌数花色都一致的情况下，牌型也相同，则一定符合规则
-        if(getCardType(selectCards, levelPoint) === currentState.cardType) {
-            return true
-        }
+        // 判断： 牌型相同，则一定符合规则
+        if(getCardType(selectCards, levelPoint) === currentState.cardType) return true;
         
+        // 前提： 手中有首出牌种类的牌 + 手牌中的首出牌种类牌数大于等于需出牌数 + 花色相同 + 牌型不同
 
-        // 牌数花色都一致的情况下，首出者出拖拉机、对子时，有拖拉机必须出拖拉机，有对子必须出对子。
+        // 判断： 首出者出拖拉机、对子时，有拖拉机必须出拖拉机，有对子必须出对子。
         if(currentState.cardType === 1)  {
 
             for (let i = 0; i < groupedCards[group].length - 1; i++) {
@@ -364,7 +365,6 @@ window.pokerHelper = {};
                     testCards.push(groupedCards[group][i + j])
                 });
                 
-                console.log({testCards})
                 // 有拖拉机时未出拖拉机
                 if(getCardType(testCards, levelPoint) === 2) {
 
@@ -378,7 +378,7 @@ window.pokerHelper = {};
             
             selectCards.forEach((cardIndex, i) => {
 
-                if(i < selectCards.length - 1 && pokers[cardIndex].value === pokers[selectCards[i + 1]].value){
+                if(i < selectCards.length - 1 && pokers[cardIndex].value === pokers[selectCards[i + 1]].value && pokers[cardIndex].suit === pokers[selectCards[i + 1]].suit){
                     num++;
                 }
             });
@@ -387,7 +387,7 @@ window.pokerHelper = {};
             var allNum = 0; //手牌对子数
             groupedCards[group].forEach((cardIndex, i) => {
 
-                if(i < groupedCards[group].length - 1 && pokers[cardIndex].value === pokers[groupedCards[group][i + 1]].value){
+                if(i < groupedCards[group].length - 1 && pokers[cardIndex].value === pokers[groupedCards[group][i + 1]].value && pokers[cardIndex].suit === pokers[groupedCards[group][i + 1]].suit){
                     allNum++;
                 }
             });
@@ -397,6 +397,10 @@ window.pokerHelper = {};
                 return false;
             }
         }
+
+        // 手中有首出牌种类的牌 + 手牌中的首出牌种类牌数大于等于需出牌数 + 花色相同 + 牌型不同 + 首出者出拖拉机、对子时，有拖拉机已出拖拉机，有对子已出对子。
+
+        return true
     }
     
     /**

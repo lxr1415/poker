@@ -102,6 +102,7 @@ function clearPlayCard() {
     }
 }
 
+// 游戏准备
 function ready() {
 
     ws.send(JSON.stringify({
