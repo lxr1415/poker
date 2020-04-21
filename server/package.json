@@ -1,0 +1,14 @@
+{
+  "name": "rtsp-ws-proxy",
+  "version": "1.0.0",
+  "description": "Multi rtsp-stream ws proxy",
+  "main": "ws-proxy.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Alexey Kokov",
+  "license": "ISC",
+  "dependencies": {
+    "ws": "^3.2.0"
+  }
+}
